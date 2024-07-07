@@ -1,0 +1,15 @@
+@font-face {
+    font-family: 'Mansheen';
+    font-weight: normal;
+    font-style: normal;
+    src: url('/storage/fonts/Mansheen.ttf') format('truetype'),
+         url('/storage/fonts/Mansheen.otf') format('opentype');
+}
+
+@font-face {
+    font-family: 'Mansheen';
+    font-weight: normal;
+    font-style: italic;
+    src: url('/storage/fonts/Mansheen Italic.ttf') format('truetype'),
+         url('/storage/fonts/Mansheen Italic.otf') format('opentype');
+}
