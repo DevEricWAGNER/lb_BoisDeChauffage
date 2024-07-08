@@ -12,17 +12,21 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    <body class="relative h-screen bg-center bg-cover" style="background-image: url('{{asset('storage/img/IMG-20240429-WA0005.jpg')}}')">
+        <div class="absolute w-screen h-screen bg-black/50"></div>
+        <a class="absolute justify-center hidden mb-4 md:flex" href="{{route('home')}}">
+            <img id="logo1" alt="Logo"
+                class="w-32 h-32">
+        </a>
+        <div class="flex items-center justify-center h-full">
+            <div class="w-full max-w-lg p-8 py-12 text-white border shadow-lg bg-white/25 rounded-3xl boder-white backdrop-blur-sm">
+                <a class="flex justify-center mb-4 md:hidden" href="{{route('home')}}">
+                    <img id="logo2" alt="Logo"
+                        class="w-24 h-24">
                 </a>
-            </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>
