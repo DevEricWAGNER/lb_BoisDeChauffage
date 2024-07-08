@@ -1,3 +1,3 @@
-[] Responsive
-[] Ajout des Produits
-[] Stripe bons liens
+[ ] Responsive
+[ ] Ajout des Produits
+[ ] Stripe bons liens
