@@ -96,10 +96,10 @@ Add additional notes about how to deploy this on a live system.
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 
--   [MongoDB](https://www.mongodb.com/) - Database
--   [Express](https://expressjs.com/) - Server Framework
--   [VueJs](https://vuejs.org/) - Web Framework
--   [NodeJs](https://nodejs.org/en/) - Server Environment
+-   [MySQL](https://www.mysql.com/en/) - Database
+-   [Laravel](https://laravel.com/) - Framework
+-   [JQuery](https://jquery.com/) - Javascript Librairy
+-   [Tailwindcss](https://tailwindcss.com/) - Style
 
 ## ✍️ Authors <a name = "authors"></a>
 
