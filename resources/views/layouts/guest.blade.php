@@ -16,6 +16,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="relative h-screen bg-center bg-cover" style="background-image: url('{{asset('storage/img/IMG-20240429-WA0005.jpg')}}')">
+        <div id="preloader" class="fixed top-0 z-50 flex items-center justify-center w-full min-h-screen bg-black">
+            <img src="{{ asset('storage/img/preloader.gif') }}" class="w-20">
+        </div>
         <div class="absolute w-screen h-screen bg-black/50"></div>
         <a class="absolute justify-center hidden mb-4 md:flex" href="{{route('home')}}">
             <img id="logo1" alt="Logo"
