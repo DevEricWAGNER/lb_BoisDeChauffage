@@ -42,25 +42,30 @@ class ProductsController extends Controller
 
     public function addToCart(Request $request)
     {
+        // if user is connected
+        if (auth()->check()) {
+            $product = Product::findOrFail($request->product_id);
 
-        $product = Product::findOrFail($request->product_id);
+            $cart = session()->get('cart', []);
 
-        $cart = session()->get('cart', []);
+            if(isset($cart[$request->product_id])) {
+                $cart[$request->product_id]['quantity'] + $request->quantity;
+            }  else {
+                $cart[$request->product_id] = [
+                    "product_name" => $product->product_name,
+                    "product_description" => $product->product_description,
+                    "photo" => $product->photo,
+                    "price" => $product->price,
+                    "quantity" => $request->quantity
+                ];
+            }
 
-        if(isset($cart[$request->product_id])) {
-            $cart[$request->product_id]['quantity'] + $request->quantity;
-        }  else {
-            $cart[$request->product_id] = [
-                "product_name" => $product->product_name,
-                "product_description" => $product->product_description,
-                "photo" => $product->photo,
-                "price" => $product->price,
-                "quantity" => $request->quantity
-            ];
+            session()->put('cart', $cart);
+            return redirect()->back()->with('success', 'Product add to cart successfully!');
+        } else {
+            return redirect()->route('login');
         }
 
-        session()->put('cart', $cart);
-        return redirect()->back()->with('success', 'Product add to cart successfully!');
     }
 
     public function update(Request $request)

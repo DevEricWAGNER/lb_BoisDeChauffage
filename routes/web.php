@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectInfoController;
@@ -30,5 +31,13 @@ Route::patch('update-cart', [ProductsController::class, 'update'])->name('update
 Route::delete('remove-from-cart', [ProductsController::class, 'remove'])->name('remove_from_cart');
 
 Route::get('/projectInfos', [ProjectInfoController::class, 'getInfos'])->name('projectInfos.index');
+
+
+Route::get('/tests', function () {
+    return view('welcome');
+});
+
+Route::get('/autocomplete', [AddressController::class, 'autocomplete']);
+
 
 require __DIR__.'/auth.php';

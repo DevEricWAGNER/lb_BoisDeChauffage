@@ -38,6 +38,25 @@ if (window.location.pathname == "/login" || window.location.pathname == "/regist
             EndLoadingScreen();
         }
     });
+} else if (window.location.pathname == "/success" || window.location.pathname == "/cancel") {
+    LoadingScreen();
+    $.ajax({
+        url: '/projectInfos',
+        type: 'GET',
+        success: function(response) {
+            var html = "";
+            document.title = response.siteName;
+            var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = url + 'storage/1/' + response.siteLogo;
+            document.getElementsByTagName('head')[0].appendChild(link);
+            const logo_success = document.getElementById('logo_success');
+            logo_success.src = url + 'storage/1/' + response.siteLogo;
+
+            EndLoadingScreen();
+        }
+    });
 } else {
     LoadingScreen();
     $.ajax({

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,11 +22,8 @@ class StripeController extends Controller
 
     public function session(Request $request)
     {
-        //$user = auth()->user();
+        $stripe = new \Stripe\StripeClient($this->stripe_sk);
         $productItems = [];
-
-        \Stripe\Stripe::setApiKey($this->stripe_sk);
-
         foreach (session('cart') as $id => $details) {
             $product_name = $details['product_name'];
             $total = $details['price'];
@@ -43,30 +42,51 @@ class StripeController extends Controller
                 'quantity' => $quantity
             ];
         }
-
-        $checkoutSession = \Stripe\Checkout\Session::create([
+        $response = $stripe->checkout->sessions->create([
             'line_items' => $productItems,
             'mode' => 'payment',
-            'allow_promotion_codes' => true,
-            'metadata' => [
-                'user_id' => Auth::user()->id,
-            ],
-            'customer_email' => Auth::user()->email,
-            'success_url' => route('success'),
+            'success_url' => route('success').'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('cancel'),
         ]);
-
-        return redirect()->away($checkoutSession->url);
+        if(isset($response->id) && $response->id != ''){
+            return redirect($response->url);
+        } else {
+            return redirect()->route('cancel');
+        }
     }
 
-    public function success()
+    public function success(Request $request)
     {
-        $cart = session('cart', []);
-        foreach ($cart as $id => $details) {
-            unset($cart[$id]);
-            session(['cart' => $cart]);
+        if(isset($request->session_id)) {
+
+            $stripe = new \Stripe\StripeClient($this->stripe_sk);
+            $response = $stripe->checkout->sessions->retrieve($request->session_id);
+            //dd($response);
+            foreach (session('cart') as $id => $details) {
+                $product_name = $details['product_name'];
+                $total = $details['price'];
+                $quantity = $details['quantity'];
+
+                $payment = new Payment();
+                $payment->payment_id = $response->id;
+                $payment->product_name = $product_name;
+                $payment->quantity = $quantity;
+                $payment->amount = $total;
+                $payment->currency = $response->currency;
+                $payment->customer_name = $response->customer_details->name;
+                $payment->customer_email = $response->customer_details->email;
+                $payment->payment_status = $response->status;
+                $payment->payment_method = "Stripe";
+                $payment->user_id = Auth::id();
+                $payment->save();
+            }
+
+            session()->forget('cart');
+            return view('success');
+
+        } else {
+            return redirect()->route('cancel');
         }
-        return "Thanks for your order. You have just completed your payment. The seller will reach out to you as soon as possible.";
     }
 
     public function cancel()
