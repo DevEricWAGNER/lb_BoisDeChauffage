@@ -53,15 +53,17 @@ class ProductsController extends Controller
         $products = [];
 
         // Vérifie les produits dans le panier
-        foreach ($cart as $id => $details) {
-            $product = Product::find($id);
-            if ($product) {
-                $products[$id] = $product;
-                $total += $details['price'] * $details['quantity'];
-            } else {
-                // Nettoie les produits invalides du panier
-                unset($cart[$id]);
-                session(['cart' => $cart]);
+        if ($cart) {
+            foreach ($cart as $id => $details) {
+                $product = Product::find($id);
+                if ($product) {
+                    $products[$id] = $product;
+                    $total += $details['price'] * $details['quantity'];
+                } else {
+                    // Nettoie les produits invalides du panier
+                    unset($cart[$id]);
+                    session(['cart' => $cart]);
+                }
             }
         }
 
@@ -152,11 +154,6 @@ class ProductsController extends Controller
 
     public function remove(Request $request)
     {
-        // Validate request
-        $request->validate([
-            'id' => 'required|integer|exists:products,id',
-        ]);
-
         if ($request->id) {
             $cart = session()->get('cart', []);
             if (isset($cart[$request->id])) {

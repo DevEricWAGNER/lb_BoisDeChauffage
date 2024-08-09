@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
+use App\Models\CartProduct;
 use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
@@ -81,12 +83,31 @@ class StripeController extends Controller
                 $payment->save();
             }
 
-            session()->forget('cart');
+            $this->clearCart();
             return view('success');
 
         } else {
             return redirect()->route('cancel');
         }
+    }
+
+    private function clearCart()
+    {
+        // Supprimer les articles du panier de la base de données
+        $userId = Auth::id();
+        if ($userId) {
+            // Supprimer les articles du panier de l'utilisateur actuel
+            $cart = Cart::where('user_id', $userId)->first();
+
+            if ($cart) {
+                CartProduct::where('cart_id', $cart->id)
+                            ->delete();
+            }
+            $cart->delete();
+        }
+
+        // Effacer également le panier de la session
+        session()->forget('cart');
     }
 
     public function cancel()
