@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('update-cart', [ProductsController::class, 'update'])->name('update_cart');
     Route::delete('remove-from-cart', [ProductsController::class, 'remove'])->name('remove_from_cart');
     Route::get('/commandes', [ProfileController::class, 'commandes'])->name('commandes');
+
+    Route::get('/showDetails/{id}', [ProfileController::class, 'showDetailsCommande'])->name('showDetails');
 });
 
 Route::post('/session', [StripeController::class, 'session'])->name('session');

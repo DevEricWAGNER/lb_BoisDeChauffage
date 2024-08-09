@@ -82,7 +82,7 @@ if (window.location.pathname == "/login" || window.location.pathname == "/regist
             }
             if (response.siteLinkedin != "") {
                 html += `
-                <a href="https://" target="_blank" rel="noopener noreferrer">
+                <a href="${response.siteLinkedin}" target="_blank" rel="noopener noreferrer">
                     <img class="lg:w-16 w-6" src="${siteUrl}storage/icons/social/Linkedin.png" alt="">
                 </a>`;
             }
@@ -135,6 +135,41 @@ if (window.location.pathname == "/login" || window.location.pathname == "/regist
         document.getElementById("user_name_infos").classList.remove("ml-2");
         document.getElementById("user_name_infos").classList.add("w-0");
     })
+
+    $(document).on('click', '.show_details', function() {
+        LoadingScreen();
+        const article = $(this).closest('article')
+        const id = article.data('id')
+        $.ajax({
+            url: '/showDetails/' + id,
+            type: 'GET',
+            success: function(response) {
+                if (response.error) {
+                    // Gérer l'erreur si la commande n'est pas trouvée
+                    console.error('Erreur:', response.error);
+                    return;
+                }
+                $('#commandeModal').show();
+                $('#modal-body').html(response.html);
+            },
+            error: function(xhr) {
+                // Gérer les erreurs AJAX
+                console.error('Erreur:', xhr.responseText);
+            }
+        })
+        EndLoadingScreen();
+    })
+
+    $(document).on('click', '.close', function() {
+        $('#commandeModal').hide();
+    });
+
+    // Fermer le modal quand l'utilisateur clique en dehors du contenu du modal
+    $(window).on('click', function(event) {
+        if ($(event.target).is('#commandeModal')) {
+            $('#commandeModal').hide();
+        }
+    });
 
 }
 

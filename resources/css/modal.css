@@ -1,0 +1,21 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Couleur de fond semi-transparente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999999; /* Assurez-vous qu'il soit au-dessus de tout autre contenu */
+}
+
+.modal-content {
+    background-color: #f0f0f0; /* Couleur de fond du modal */
+    padding: 20px;
+    border-radius: 5px;
+    position: relative;
+    width: 80%;
+    max-width: 800px;
+}
