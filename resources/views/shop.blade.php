@@ -1,26 +1,26 @@
 <x-home>
-    <section class="flex flex-col gap-5 px-10 mb-12">
-        <div class="flex items-center gap-5">
-            <span class="w-6 h-12 bg-[#966F33] rounded-full"></span>
-            <p class="text-3xl">Tous les produits</p>
+    <section class="flex flex-col gap-5 lg:px-10 lg:mb-12">
+        <div class="flex items-center gap-2 px-5 lg:gap-5 lg:px-0">
+            <span class="lg:w-6 lg:h-12 w-3 h-6 bg-[#966F33] rounded-full"></span>
+            <p class="text-lg lg:text-3xl">Tous les produits</p>
         </div>
         <div class="flex flex-col gap-5">
-            <h1 class="text-[#966F33] text-5xl font-extrabold">Explorer nos Produits</h1>
-            <div class="grid grid-cols-5 gap-5 mx-auto">
+            <h1 class="text-[#966F33] lg:text-5xl text-2xl font-extrabold px-5 lg:px-0">Explorer nos Produits</h1>
+            <div class="grid grid-cols-2 gap-2 mx-auto lg:gap-5 lg:grid-cols-5">
                 @foreach ($products as $product)
                     <article class="flex flex-col gap-5 p-5">
-                        <div class="w-60 aspect-square relative bg-gradient-to-br from-[#00000000] via-[#00000050] via-[25%] to-[#000000] backdrop-blur-sm rounded-xl overflow-hidden">
-                            <img class="absolute top-0 left-0 h-60" src="{{ asset('storage/' . $product->photo) }}" alt="{{ $product->product_name }}">
+                        <div class="lg:w-60 w-40 aspect-square relative bg-gradient-to-br from-[#00000000] via-[#00000050] via-[25%] to-[#000000] backdrop-blur-sm rounded-xl overflow-hidden">
+                            <img class="absolute top-0 left-0 h-40 lg:h-60" src="{{ $product->photo && strpos($product->photo, 'http') === 0 ? $product->photo : asset('storage/' . $product->photo) }}" alt="{{ $product->product_name }}">
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-white">{{ $product->product_name }}</h2>
+                            <h2 class="text-sm font-bold text-white lg:text-2xl">{{ $product->product_name }}</h2>
                             {{--<p>{{ $product->product_description }}</p>--}}
                             <div class="flex items-end justify-between w-full">
-                                <p class="text-xl font-bold">{{ number_format($product->price / 100, 2) }} €</p>
-                                <p class="text-sm underline">{{$product->sales_count}} {{ __('Ventes') }}</p>
+                                <p class="text-sm font-bold lg:text-xl">{{ number_format($product->price / 100, 2) }} €</p>
+                                <p class="text-xs underline lg:text-sm">{{$product->sales_count}} {{ __('Ventes') }}</p>
                             </div>
                         </div>
-                        <form action="{{ route('add_to_cart') }}" method="POST" class="flex justify-between">
+                        <form action="{{ route('add_to_cart') }}" method="POST" class="flex flex-col justify-between gap-2 lg:flex-row">
                             @csrf
                             @method('POST')
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -33,7 +33,7 @@
                                 <option value="6">6</option>
                                 <option value="7">7</option>
                             </select>
-                            <button type="submit" class="text-[#FF9B25] px-4 py-2 bg-gradient-to-br from-[#272726] to-[#171716] w-fit rounded-xl border solid border-[#F8F8F8]">Ajouter au panier</button>
+                            <button type="submit" class="text-[#FF9B25] lg:px-4 px-2 lg:py-2 py-1 w-full bg-gradient-to-br from-[#272726] to-[#171716] lg:w-fit rounded-xl border solid border-[#F8F8F8]">Ajouter au panier</button>
                         </form>
                     </article>
                 @endforeach

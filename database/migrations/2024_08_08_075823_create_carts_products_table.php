@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::connection( 'mysqlSite' )->table('products', function (Blueprint $table) {
-            $table->string('type');
+        Schema::create('carts_products', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+            $table->foreignId("cart_id")->constrained();
+            $table->foreignId("product_id")->constrained();
+            $table->integer('quantity');
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::connection( 'mysqlSite' )->table('products', function (Blueprint $table) {
-            $table->dropColumn('type');
-        });
+        Schema::dropIfExists('carts_products');
     }
 };

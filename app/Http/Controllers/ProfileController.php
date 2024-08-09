@@ -57,4 +57,13 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function commandes()
+    {
+        $user = Auth::user();
+        $commandes = $user->payments;
+
+        return view('commandes', compact('commandes'));
+
+    }
 }

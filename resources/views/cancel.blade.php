@@ -25,8 +25,8 @@
         <main class="flex flex-col items-center justify-center h-full gap-14">
             <div class="flex flex-col items-center justify-center">
                 <img src="" alt="" class="w-60 aspect-square" id="logo_success">
-                <h1 class="text-9xl font-extrabold text-[#966F33]">{{ __('Annulation') }}</h1>
-                <h2 class="text-6xl font-bold">{{ __('de la commande') }}</h2>
+                <h1 class="lg:text-9xl text-3xl font-extrabold text-[#966F33]">{{ __('Annulation') }}</h1>
+                <h2 class="text-xl font-bold lg:text-6xl">{{ __('de la commande') }}</h2>
             </div>
             <a href="{{route('home')}}" class="text-[#FF9B25] lg:text-2xl lg:px-20 lg:py-4 px-4 py-2 bg-gradient-to-br from-[#272726] to-[#171716] w-fit rounded-xl border solid border-[#F8F8F8]">{{ __('Retourner à l\'accueil') }}</a>
         </main>

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('customer_email');
             $table->string('payment_status');
             $table->string('payment_method');
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
         });
     }

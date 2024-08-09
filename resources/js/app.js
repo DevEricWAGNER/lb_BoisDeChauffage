@@ -116,6 +116,26 @@ if (window.location.pathname == "/login" || window.location.pathname == "/regist
             EndLoadingScreen();
         }
     });
+
+    $("#user-menu-button").click(function() {
+        $("#user-menu").toggleClass("hidden");
+    });
+
+    $("#user-menu").click(function() {
+        $("#user-menu").toggleClass("hidden");
+    });
+
+    document.getElementById("user-menu-button").addEventListener("mouseover", function (event) {
+        document.getElementById("user_name_infos").classList.remove("w-0");
+        document.getElementById("user_name_infos").classList.add("w-fit");
+        document.getElementById("user_name_infos").classList.add("ml-2");
+    })
+    document.getElementById("user-menu-button").addEventListener("mouseout", function (event) {
+        document.getElementById("user_name_infos").classList.remove("w-fit");
+        document.getElementById("user_name_infos").classList.remove("ml-2");
+        document.getElementById("user_name_infos").classList.add("w-0");
+    })
+
 }
 
 document.addEventListener('DOMContentLoaded', function() {

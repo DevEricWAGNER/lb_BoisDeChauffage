@@ -17,6 +17,8 @@ return new class extends Migration
             $table->text('product_description');
             $table->string('photo');
             $table->string('price');
+            $table->string('type');
+            $table->integer('sales_count')->default(0);
             $table->timestamps();
         });
     }
