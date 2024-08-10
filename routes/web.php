@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('/admin')->group(function() {
     Route::get('/commandes', [AdminController::class, 'commandes'])->name('admin.commandes');
+    Route::post('/changeStatus', [AdminController::class, 'changeStatus'])->name('admin.changeStatus');
 });
 
 Route::post('/session', [StripeController::class, 'session'])->name('session');

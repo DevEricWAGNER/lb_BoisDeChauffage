@@ -76,9 +76,11 @@ if (window.location.pathname == "/login" || window.location.pathname == "/regist
             logov1.src = url + 'storage/1/' + response.siteLogo;
             const HomePageLink = document.getElementById('HomePageLink')
             const HomePageLink2 = document.getElementById('HomePageLink2')
-            if (response.viewHomePageLinkInNavbar == true) {
-                HomePageLink.classList.remove("hidden")
-                HomePageLink2.classList.remove("hidden")
+            if (HomePageLink && HomePageLink2) {
+                if (response.viewHomePageLinkInNavbar == true) {
+                    HomePageLink.classList.remove("hidden")
+                    HomePageLink2.classList.remove("hidden")
+                }
             }
             if (response.siteLinkedin != "") {
                 html += `
