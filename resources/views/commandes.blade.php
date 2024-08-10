@@ -14,7 +14,7 @@
                         $firstCommande = $data['items']->first();
                     @endphp
                     <article class="flex flex-col justify-between w-full gap-2 px-4 py-6 border-b border-gray-700 lg:flex-row" data-id="{{ $payment_id }}">
-                        <h2 class="text-xl font-bold">Commande passée le {{ Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $firstCommande->updated_at)->format('d/m/Y') }}</h2>
+                        <h2 class="text-xl font-bold">Commande passée le {{ Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $firstCommande->updated_at)->format('d/m/Y H:i') }}</h2>
                         @if ($firstCommande->payment_status == "complete")
                             <p class="flex items-center gap-5 text-lg">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-cart-check" viewBox="0 0 16 16">
