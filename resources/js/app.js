@@ -16,6 +16,20 @@ function EndLoadingScreen() {
     setTimeout(() => { loader.style.display = 'none'; }, 500);
 }
 
+function fadeOutEffect() {
+    var alert = document.getElementById('alert-additional-content-2');
+    if (alert) {
+        alert.style.transition = 'opacity 0.5s ease-out';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+            alert.remove();
+        }, 500); // Supprimer l'élément après l'animation de 0.5s
+    }
+}
+
+// Déclencher automatiquement le fade-out après 5 secondes
+setTimeout(fadeOutEffect, 5000);
+
 const url = "http://template.webserver.webwagner.fr/";
 const siteUrl = "http://lbboisdechauffage.webserver.webwagner.fr/";
 
