@@ -1,4 +1,20 @@
 <x-home>
+    @if (\Session::has('error'))
+        <div id="alert-additional-content-2" class="fixed z-50 flex items-center gap-10 p-4 text-red-800 transform -translate-x-1/2 border border-red-300 rounded-lg bg-red-50 dark:bg-[#171716] dark:text-red-400 dark:border-red-800 bottom-5 left-1/2" role="alert">
+            <div class="flex items-center gap-3">
+                <svg class="flex-shrink-0 w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+                </svg>
+                <span class="sr-only">Info</span>
+                <h3 class="text-lg font-medium text-center">{!! \Session::get('error') !!}</h3>
+            </div>
+            <div class="flex items-center">
+                <button type="button" class="text-red-800 bg-transparent border border-red-800 hover:bg-red-900 hover:text-white focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 text-center dark:hover:bg-red-600 dark:border-red-600 dark:text-red-500 dark:hover:text-white dark:focus:ring-red-800" onclick="document.getElementById('alert-additional-content-2').remove()" aria-label="Close">
+                    D'accord
+                </button>
+            </div>
+        </div>
+    @endif
     <section class="relative px-3 py-5 overflow-hidden lg:px-6 lg:py-52">
         <div class="absolute top-0 left-0 z-0 w-full h-full overflow-hidden opacity-40">
             <div

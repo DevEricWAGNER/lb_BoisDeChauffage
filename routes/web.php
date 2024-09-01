@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectInfoController;
@@ -26,6 +27,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/commandes', [ProfileController::class, 'commandes'])->name('commandes');
 
     Route::get('/showDetails/{id}', [ProfileController::class, 'showDetailsCommande'])->name('showDetails');
+});
+
+Route::prefix('/admin')->group(function() {
+    Route::get('/commandes', [AdminController::class, 'commandes'])->name('admin.commandes');
+    Route::post('/changeStatus', [AdminController::class, 'changeStatus'])->name('admin.changeStatus');
 });
 
 Route::post('/session', [StripeController::class, 'session'])->name('session');
