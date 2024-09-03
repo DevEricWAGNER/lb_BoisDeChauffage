@@ -25,6 +25,38 @@ class StripeController extends Controller
     public function session(Request $request)
     {
         $stripe = new \Stripe\StripeClient($this->stripe_sk);
+
+        // 1. Créer un client Stripe avec l'adresse de livraison
+        $customer = $stripe->customers->create([
+            'email' => Auth::user()->email,
+            'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+            'phone' => Auth::user()->phone,
+            'address' => [
+                'line1' => Auth::user()->line1,
+                'line2' => Auth::user()->line2,
+                'city' => Auth::user()->city,
+                'postal_code' => Auth::user()->postal_code,
+                'country' => Auth::user()->country,
+            ],
+            'shipping' => [
+                'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                'address' => [
+                    'line1' => Auth::user()->line1,
+                    'line2' => Auth::user()->line2,
+                    'city' =>  Auth::user()->city,
+                    'postal_code' => Auth::user()->postal_code,
+                    'country' => Auth::user()->country,
+                ],
+            ],
+        ]);
+
+        // 2. Calculer le coût de la livraison (exemple)
+        $startingPoint = '123 Main St, Paris, FR';
+        $destinationPoint = Auth::user()->line1 + ", " + Auth::user()->city + ", " + Auth::user()->country;
+        $distanceInKm = $this->calculateDistance($startingPoint, $destinationPoint);
+        $deliveryCost = $distanceInKm * 0.50 * 100; // Convertir en centimes
+
+        // 3. Créer les items de produit pour Stripe
         $productItems = [];
         foreach (session('cart') as $id => $details) {
             $product_name = $details['product_name'];
@@ -41,20 +73,48 @@ class StripeController extends Controller
                     'currency' => 'EUR',
                     'unit_amount' => $unit_amount,
                 ],
-                'quantity' => $quantity
+                'quantity' => $quantity,
             ];
         }
+
+        // 4. Créer la session Stripe
         $response = $stripe->checkout->sessions->create([
+            'customer' => $customer->id, // Associer le client créé à la session
             'line_items' => $productItems,
             'mode' => 'payment',
             'success_url' => route('success').'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('cancel'),
+            'shipping_address_collection' => [
+                'allowed_countries' => ['FR'], // Limité à la France dans cet exemple
+            ],
+            'shipping_options' => [
+                [
+                    'shipping_rate_data' => [
+                        'type' => 'fixed_amount',
+                        'fixed_amount' => [
+                            'amount' => $deliveryCost, // Utiliser le coût de livraison calculé
+                            'currency' => 'EUR',
+                        ],
+                        'display_name' => 'Livraison calculée en fonction de la distance',
+                    ],
+                ],
+            ],
         ]);
+
+        // 5. Rediriger l'utilisateur vers la page de paiement Stripe
         if(isset($response->id) && $response->id != ''){
             return redirect($response->url);
         } else {
             return redirect()->route('cancel');
         }
+    }
+
+    private function calculateDistance($startingPoint, $destinationPoint)
+    {
+
+        $distanceInKm = 100;
+
+        return $distanceInKm;
     }
 
     public function success(Request $request)

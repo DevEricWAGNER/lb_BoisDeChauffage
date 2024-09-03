@@ -1,5 +1,6 @@
 @import './fonts.css';
 @import './modal.css';
+@import './style.css';
 
 @tailwind base;
 @tailwind components;

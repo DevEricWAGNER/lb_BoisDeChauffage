@@ -25,7 +25,7 @@
                 class="w-32 h-32">
         </a>
         <div class="flex items-center justify-center h-full">
-            <div class="w-full max-w-lg p-8 py-12 text-white border shadow-lg bg-white/25 rounded-3xl boder-white backdrop-blur-sm">
+            <div class="w-full max-w-2xl p-8 py-12 text-white border shadow-lg bg-white/25 rounded-3xl boder-white backdrop-blur-sm">
                 <a class="flex justify-center mb-4 md:hidden" href="{{route('home')}}">
                     <img id="logo2" alt="Logo"
                         class="w-24 h-24">
