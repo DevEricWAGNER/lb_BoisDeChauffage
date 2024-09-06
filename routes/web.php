@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdressController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectInfoController;
@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('update-cart', [ProductsController::class, 'update'])->name('update_cart');
     Route::delete('remove-from-cart', [ProductsController::class, 'remove'])->name('remove_from_cart');
     Route::get('/commandes', [ProfileController::class, 'commandes'])->name('commandes');
+    Route::get('/adresses', [ProfileController::class, 'adresses'])->name('adresses');
+    Route::post('/createAdress', [AdressController::class, 'store'])->name('createAdress');
 
     Route::get('/showDetails/{id}', [ProfileController::class, 'showDetailsCommande'])->name('showDetails');
 });

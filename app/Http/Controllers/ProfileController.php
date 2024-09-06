@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Adress;
 use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -112,20 +113,25 @@ class ProfileController extends Controller
             ['position' => '100%', 'check' => $progressPercent >= 100, 'label' => 'Livré'],
         ];
 
+        $address = Adress::where('id', $commandeLines[0]->adress_id)->first()->get();
+        $address = $address[0];
+        $adress = $address->line1 . ", " . $address->postal_code . " " . $address->city;
+
         // Formater la barre de progression avec des points marqués et des légendes
         $html = "<div class='px-4 py-5'>
+            <div class='py-2'>Adresse de livraison : " . $adress . "</div>
             <div class='relative w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700'>
                 <!-- Barre de progression -->
                 <div class='absolute top-0 left-0 h-2.5 rounded-full bg-blue-600' style='width: {$progress}'></div>
         ";
 
         foreach ($points as $point) {
-            $checkmark = $point['check'] ? "<svg xmlns='http://www.w3.org/2000/svg' class='absolute w-4 h-4 text-white transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L19 7' /></svg>" : "";
+            $checkmark = $point['check'] ? "relative flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full" : "relative flex items-center justify-center w-6 h-6 bg-gray-200 rounded-full";
 
             $html .= "
                 <div class='absolute' style='left: {$point['position']}; transform: translateX(-50%) translateY(-15%);'>
-                    <div class='relative flex items-center justify-center w-6 h-6 bg-blue-600 rounded-full'>
-                        $checkmark
+                    <div class='" . $checkmark . "'>
+                        <svg xmlns='http://www.w3.org/2000/svg' class='absolute w-4 h-4 text-white transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5L19 7' /></svg>
                     </div>
                     <span class='block mt-1 text-sm text-center text-gray-600' style='transform: translateX(-25%);'>{$point['label']}</span>
                 </div>
@@ -162,6 +168,31 @@ class ProfileController extends Controller
         $html .= "</div>";
 
         // Retourner les données au format JSON
+        return response()->json(['html' => $html]);
+    }
+
+    public function adresses() {
+        $adresses = Auth::user()->adresses;
+        $shippingAdresses = $adresses->filter(function ($adresse) {
+            return $adresse->address_type === 'shipping';
+        });
+        $html = "";
+
+        if ($shippingAdresses->isNotEmpty()) {
+            $html .= "<table class='text-gray-900' id='tableAdresses'><thead><th><td></td><td>Adresse ligne 1</td><td>Adresse ligne 2</td><td>Code Postal</td><td>Ville</td><td>Pays</td></th></thead><tbody>";
+            foreach ($shippingAdresses as $adresse) {
+                $html .= "<tr>";
+                $html .= "<td><input type='radio' id='selectForShipping_" . $adresse->id . "' name='selectForShipping' value='" . $adresse->id . "'></td>"; // Vous pouvez insérer un contenu ici si nécessaire
+                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line1) . "</label></td>";
+                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line2) . "</label></td>";
+                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->postal_code) . "</label></td>";
+                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->city) . "</label></td>";
+                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->country) . "</label></td>";
+                $html .= "</tr>";
+            }
+            $html .= "</tbody></table><br><button class='text-gray-900 btnNewAdress'>Ajouter une nouvelle adresse</button>";
+        }
+
         return response()->json(['html' => $html]);
     }
 

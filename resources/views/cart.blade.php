@@ -43,9 +43,14 @@
                         <h4 class="text-2xl">{{ __('Sous total:') }} <span class="font-bold">{{ number_format($total / 100 , 2 ) }} €</span></h4>
                         <p class="text-xs">{{ __('En procédant au paiement, j\'accepte les') }} <a href="" class="text-indigo-500">{{ __('Termes') }}</a> {{ __('et la') }} <a href="" class="text-indigo-500">{{ __('Politique de confidentialité') }}</a></p>
                     </div>
-                    <form action="{{route('session')}}" method="POST">
+
+                    <button id="adresses" data-modal-target="default-modal" data-modal-toggle="default-modal" class="bg-[#966F33] lg:text-3xl text-lg px-2 py-1 font-extrabold lg:px-5 lg:py-3 rounded-2xl" type="button">
+                        {{ __('Passer au paiement') }}
+                    </button>
+                    <form action="{{route('session')}}" method="POST" id='proceder-au-paiement'>
                         @csrf
-                        <button class="bg-[#966F33] lg:text-3xl text-lg px-2 py-1 font-extrabold lg:px-5 lg:py-3 rounded-2xl" type="submit" id="checkout-live-button">{{ __('Passer au paiement') }}</button>
+                        <input type="hidden" name="adress_id" value="" id="adress_id">
+                        <button class="opacity-0" type="submit" id="checkout-live-button">{{ __('Passer au paiement') }}</button>
                     </form>
                 </div>
             @else
@@ -57,74 +62,311 @@
     </section>
 
 
+<!-- Modal toggle -->
 
-
-
-{{--
-<table id="cart" class="table table-hover table-condensed">
-    <thead>
-        <tr>
-            <th style="width:50%">Product</th>
-            <th style="width:10%">Price</th>
-            <th style="width:8%">Quantity</th>
-            <th style="width:22%" class="text-center">Subtotal</th>
-            <th style="width:10%"></th>
-        </tr>
-    </thead>
-    <tbody>
-        @php $total = 0 @endphp
-        @if(session('cart'))
-            @foreach(session('cart') as $id => $details)
-                @php $total += $details['price'] * $details['quantity'] @endphp
-                <tr data-id="{{ $id }}">
-                    <td data-th="Product">
-                        <div class="row">
-                            <div class="col-sm-3 hidden-xs">
-                                <img src="{{ asset('storage') }}/{{ $details['photo'] }}" width="100" height="100" class="img-responsive" />
-                            </div>
-                            <div class="col-sm-9">
-                                <h4 class="nomargin"></h4>
-                            </div>
-                        </div>
-                    </td>
-                    <td data-th="Price">{{ $details['price'] }} €</td>
-                    <td data-th="Quantity">
-                        <input type="number" value="{{ $details['quantity'] }}" class="form-control quantity cart_update" min="1" />
-                    </td>
-                    <td data-th="Subtotal" class="text-center">
-                        ${{ $details['price'] * $details['quantity'] }}
-                    </td>
-                    <td class="actions" data-th="">
-                        <button class="btn btn-danger btn-sm cart_remove"><i class="fa fa-trash-o"></i> Delete</button>
-                    </td>
-                </tr>
-            @endforeach
-        @endif
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="5" style="text-align:right;">
-                <h3><strong>Total ${{ $total }}</strong></h3>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="5" style="text-align:right;">
-                <form action="/session" method="POST">
+  <!-- Main modal -->
+  <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+      <div class="relative w-full max-w-2xl max-h-full p-4">
+          <!-- Modal content -->
+          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+              <!-- Modal header -->
+              <div class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600">
+                  <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    {{ __('Choisissez une adresse de livraison') }}
+                  </h3>
+                  <button type="button" class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                      </svg>
+                      <span class="sr-only">Close modal</span>
+                  </button>
+              </div>
+              <!-- Modal body -->
+              <div class="p-4 space-y-4 md:p-5" id="modalContent">
+                <div id="modalContentAjax"></div>
+                <form id="NewAdresse" method="POST" action="{{route('createAdress')}}">
                     @csrf
-                    <a href="{{ url('/') }}" class="btn btn-danger"> <i class="fa fa-arrow-left"></i> Continue Shopping</a>
-                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-success" type="submit" id="checkout-live-button"><i class="fa fa-money"></i> Checkout</button>
+                    @method('POST')
+                    <h4 class="text-lg text-center text-gray-900">Veuillez entrer une nouvelle adresse</h4>
+                    <div>
+                        <x-input-label for="country" :value="__('Pays')" />
+                        <select id="country" name="country" class="box-border block w-full text-black border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="" disabled selected>Sélectionnez un pays</option>
+                            <option value="fr">France</option>
+                            <option value="de">Allemagne</option>
+                            <option value="be">Belgique</option>
+                            <option value="it">Italie</option>
+                            <option value="es">Espagne</option>
+                            <option value="gb">Royaume-Uni</option>
+                            <option value="ch">Suisse</option>
+                            <option value="nl">Pays-Bas</option>
+                            <option value="pt">Portugal</option>
+                        </select>
+                    </div>
+
+                    <div class="test">
+                        <div class="w-full">
+                            <x-input-label for="adresse" :value="__('Adresse')" />
+                            <x-text-input id="adresse" type="text" name="adresse" :value="old('adresse')" required placeholder="Adresse" autocomplete="adresse" disabled />
+                            <x-input-error :messages="$errors->get('adresse')" class="mt-2" />
+                        </div>
+                        <div id="selection" style="display: none;" class="dropdown"></div>
+                    </div>
+                    <div class="flex flex-col gap-2 md:flex-row">
+                        <div class="w-full">
+                            <x-input-label for="line1" :value="__('Adresse ligne 1')" />
+                            <x-text-input id="line1" type="text" name="line1" :value="old('line1')" :class="'bg-gray-400 text-white cursor-not-allowed'"  placeholder="Adresse ligne 1" autocomplete="line1" readonly />
+                            <x-input-error :messages="$errors->get('line1')" class="mt-2" />
+                        </div>
+                        <div class="w-full">
+                            <x-input-label for="line2" :value="__('Adresse ligne 2')" />
+                            <x-text-input id="line2" type="text" name="line2" :value="old('line2')" placeholder="Adresse ligne 2" autocomplete="line2" />
+                            <x-input-error :messages="$errors->get('line2')" class="mt-2" />
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2 md:flex-row">
+                        <div class="w-full">
+                            <x-input-label for="postal_code" :value="__('Code postal')" />
+                            <x-text-input id="postal_code" type="text" name="postal_code" :value="old('postal_code')" :class="'bg-gray-400 text-white cursor-not-allowed'"  placeholder="Code postal" autocomplete="postal_code" readonly />
+                            <x-input-error :messages="$errors->get('postal_code')" class="mt-2" />
+                        </div>
+                        <div class="w-full">
+                            <x-input-label for="city" :value="__('Ville')" />
+                            <x-text-input id="city" type="text" name="city" :value="old('city')" :class="'bg-gray-400 text-white cursor-not-allowed'"  placeholder="Ville" autocomplete="city" readonly />
+                            <x-input-error :messages="$errors->get('city')" class="mt-2" />
+                        </div>
+                    </div>
+
                 </form>
-            </td>
-        </tr>
-    </tfoot>
-</table>
+              </div>
+              <!-- Modal footer -->
+              <div class="flex items-center p-4 border-t border-gray-200 rounded-b md:p-5 dark:border-gray-600">
+                  <button data-modal-hide="default-modal" type="button" id='validerPopUp' class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{{__('Valider')}}</button>
+                  <button data-modal-hide="default-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">{{__('Annuler')}}</button>
+              </div>
+          </div>
+      </div>
+  </div>
 
---}}
     <script type="text/javascript">
-        $(".cart_update").change(function () {
-            $(this).closest("form").submit();
-        });
+        document.addEventListener("DOMContentLoaded", function() {
+            $(".cart_update").change(function () {
+                $(this).closest("form").submit();
+            });
 
+            $('#adresses').click(function () {
+                $.ajax({
+                    url: '/adresses',
+                    type: 'GET',
+                    success: function(response) {
+                        console.log(response)
+                        $('#modalContentAjax').empty();
+                        $('#modalContentAjax').append(response.html);
+                        $('#NewAdresse').hide();
+                    }
+                })
+            })
+
+            $(document).on('click', '#validerPopUp', function() {
+                var tableau = $('#tableAdresses');
+                var radioChecked = false;
+
+                // Étape 1 : Vérifier si le tableau existe et s'il contient des boutons radio
+                if (tableau.length > 0) {
+                    tableau.find('input[type="radio"]').each(function() {
+                        if ($(this).is(':checked')) {
+                            radioChecked = true;
+                            return false; // Sortir de la boucle dès qu'un bouton radio est trouvé coché
+                        }
+                    });
+                }
+
+                // Étape 2 : Si aucun bouton radio n'est coché ou s'il n'y a pas de tableau, vérifier les champs de NewAdresse
+                if (!radioChecked) {
+                    var allFieldsFilled = true;
+
+                    // Vérifiez chaque champ de #NewAdresse pour s'assurer qu'il est rempli, sauf line2 qui peut être vide
+                    $('#NewAdresse').find('input[type="text"], select').each(function() {
+                        if ($(this).attr('id') !== 'line2' && ($(this).val() === "" || $(this).val() === null)) {
+                            allFieldsFilled = false;
+                        }
+                    });
+
+                    // Si tous les champs requis ne sont pas remplis, afficher un message ou empêcher la soumission
+                    if (!allFieldsFilled) {
+                        alert('Veuillez sélectionner une adresse ou remplir tous les champs requis de la nouvelle adresse.');
+                        return false; // Empêcher la soumission si condition non remplie
+                    }
+
+                    $('#NewAdresse').submit();
+                } else {
+                    $('#adress_id').val($('input[type="radio"]:checked').val());
+                    $('#proceder-au-paiement').submit();
+                }
+
+            });
+
+            $(document).on('click', '.btnNewAdress', function () {
+                if ($('#NewAdresse').is(':visible')) {
+                    $(this).text('Ajouter une nouvelle adresse'); // Text when form is hidden
+                } else {
+                    $(this).text('Annuler'); // Text when form is visible
+                }
+                $('#NewAdresse').toggle();
+            });
+
+            var requestURL = 'https://api-adresse.data.gouv.fr/search/?q=';
+            var select = document.getElementById("selection");
+            var lat = "";
+            var lon = "";
+            var country_code = "";
+
+            window.onload = function() {
+                document.getElementById("adresse").addEventListener("input", autocompleteAdresse, false);
+            };
+
+            function displaySelection(response) {
+                if (response && response.length > 0) {
+                    select.style.display = "block";
+                    select.innerHTML = ''; // Clear the dropdown before adding content
+                    var ul = document.createElement('ul');
+                    select.appendChild(ul);
+
+                    response.forEach(function (element) {
+                        var li = document.createElement('li');
+                        var ligneAdresse = document.createElement('span');
+                        var infosAdresse = document.createTextNode('');
+                        if (element.address.town != undefined) {
+                            infosAdresse = document.createTextNode(' ' + element.address.postcode + ' ' + element.address.town);
+                        } else if (element.address.city != undefined) {
+                            infosAdresse = document.createTextNode(' ' + element.address.postcode + ' ' + element.address.city);
+                        } else if (element.address.village != undefined) {
+                            infosAdresse = document.createTextNode(' ' + element.address.postcode + ' ' + element.address.village);
+                        }
+                        ligneAdresse.innerHTML = element.address.house_number + " " + element.address.road;
+                        li.onclick = function () { selectAdresse(element); };
+                        li.appendChild(ligneAdresse);
+                        li.appendChild(infosAdresse);
+                        ul.appendChild(li);
+                    });
+                } else {
+                    select.style.display = "none";
+                }
+            }
+
+            function combineResults(osmData, gouvData) {
+                var combined = [];
+
+                // Fonction pour vérifier si un élément est valide
+                function isValidAddress(element) {
+                    return (
+                        element.address.house_number !== undefined &&
+                        element.address.road !== undefined &&
+                        element.address.postcode !== undefined &&
+                        (element.address.city !== undefined || element.address.town !== undefined || element.address.village !== undefined)
+                    );
+                }
+
+                // Process OpenStreetMap data
+                osmData.forEach(element => {
+                    if (isValidAddress(element)) {
+                        combined.push({
+                            address: element.address,
+                            lat: element.lat,
+                            lon: element.lon
+                        });
+                    }
+                });
+
+                // Process data.gouv.fr data
+                gouvData.features.forEach(element => {
+                    var address = {
+                        house_number: element.properties.housenumber,
+                        road: element.properties.street,
+                        postcode: element.properties.postcode,
+                        city: element.properties.city
+                    };
+
+                    if (isValidAddress({ address })) {
+                        combined.push({
+                            address: address,
+                            lat: element.geometry.coordinates[1],  // latitude
+                            lon: element.geometry.coordinates[0]   // longitude
+                        });
+                    }
+                });
+
+                return combined;
+            }
+
+            function autocompleteAdresse() {
+                var inputValue = document.getElementById("adresse").value;
+                if (inputValue) {
+                    var inputValueOsm = inputValue.replace(/ /g, '+');
+                    var inputValueGouv = inputValue.replace(/ /g, '%20');
+                    var osmApiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${inputValueOsm}&addressdetails=1&countrycodes=fr,de,gb,us&viewbox=-5.317382,51.124213,9.84375,41.705728&bounded=1`;
+                    var dataGouvApiUrl = `https://api-adresse.data.gouv.fr/search/?q=${inputValueGouv}&autocomplete=0`;
+
+                    // Fetch from both APIs
+                    Promise.all([
+                        fetch(osmApiUrl).then(response => response.json()),
+                        fetch(dataGouvApiUrl).then(response => response.json())
+                    ])
+                    .then(([osmData, gouvData]) => {
+                        var combinedResults = combineResults(osmData, gouvData);
+                        displaySelection(combinedResults);
+                    });
+                } else {
+                    select.style.display = "none";
+                }
+            }
+
+            function selectAdresse(element) {
+                document.getElementById("adresse").value = element.address.house_number + " " + element.address.road + ", " + element.address.postcode + " " + element.address.city;
+                select.style.display = "none";
+                document.getElementById("line1").value = element.address.house_number + " " + element.address.road;
+                document.getElementById("postal_code").value = element.address.postcode;
+                if (element.address.town != undefined) {
+                    document.getElementById("city").value = element.address.town;
+                } else if (element.address.city != undefined) {
+                    document.getElementById("city").value = element.address.city;
+                } else if (element.address.village != undefined) {
+                    document.getElementById("city").value = element.address.village;
+                }
+                lat = element.lat;
+                lon = element.lon;
+                getCountryCode(lat, lon);
+            }
+
+            function getCountryCode(latitude, longitude) {
+                var apiUrlCountry = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&viewbox=-5.317382,51.124213,9.84375,41.705728&bounded=1`;
+                fetch(apiUrlCountry)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.address && data.address.country_code) {
+                            country_code = data.address.country_code;
+                        }
+                    })
+                    .catch(error => {
+                        showError("Erreur lors de la vérification du numéro de téléphone.");
+                        console.error("Error:", error);
+                    });
+            }
+
+            var adresseInput = document.getElementById("adresse");
+            var countrySelect = document.getElementById("country");
+
+            // Activer les champs d'adresse et de téléphone lorsque le pays est sélectionné
+            countrySelect.addEventListener("change", function() {
+                if (countrySelect.value) {
+                    adresseInput.disabled = false;
+                } else {
+                    adresseInput.disabled = true;
+                }
+            });
+        });
     </script>
+
+
+
 </x-home>

@@ -25,11 +25,6 @@ class User extends Authenticatable
         'lastname',
         'password',
         'phone',
-        'line1',
-        'line2',
-        'city',
-        'postal_code',
-        'country'
     ];
 
     /**
@@ -58,5 +53,10 @@ class User extends Authenticatable
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function adresses()
+    {
+        return $this->hasMany(Adress::class);
     }
 }

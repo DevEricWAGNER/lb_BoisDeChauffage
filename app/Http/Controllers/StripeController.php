@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Adress;
 use App\Models\Cart;
 use App\Models\CartProduct;
 use App\Models\Order;
@@ -9,6 +10,7 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Stripe\StripeClient;
 
 class StripeController extends Controller
 {
@@ -24,7 +26,9 @@ class StripeController extends Controller
 
     public function session(Request $request)
     {
-        $stripe = new \Stripe\StripeClient($this->stripe_sk);
+        $stripe = new StripeClient($this->stripe_sk);
+
+        $adress = Adress::find($request->adress_id);
 
         // 1. Créer un client Stripe avec l'adresse de livraison
         $customer = $stripe->customers->create([
@@ -32,27 +36,27 @@ class StripeController extends Controller
             'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
             'phone' => Auth::user()->phone,
             'address' => [
-                'line1' => Auth::user()->line1,
-                'line2' => Auth::user()->line2,
-                'city' => Auth::user()->city,
-                'postal_code' => Auth::user()->postal_code,
-                'country' => Auth::user()->country,
+                'line1' => $adress->line1,
+                'line2' => $adress->line2,
+                'city' => $adress->city,
+                'postal_code' => $adress->postal_code,
+                'country' => $adress->country,
             ],
             'shipping' => [
                 'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
                 'address' => [
-                    'line1' => Auth::user()->line1,
-                    'line2' => Auth::user()->line2,
-                    'city' =>  Auth::user()->city,
-                    'postal_code' => Auth::user()->postal_code,
-                    'country' => Auth::user()->country,
+                    'line1' => $adress->line1,
+                    'line2' => $adress->line2,
+                    'city' =>  $adress->city,
+                    'postal_code' => $adress->postal_code,
+                    'country' => $adress->country,
                 ],
             ],
         ]);
 
         // 2. Calculer le coût de la livraison (exemple)
         $startingPoint = '123 Main St, Paris, FR';
-        $destinationPoint = Auth::user()->line1 + ", " + Auth::user()->city + ", " + Auth::user()->country;
+        $destinationPoint = $adress->line1 . ", " . $adress->city . ", " . $adress->country;
         $distanceInKm = $this->calculateDistance($startingPoint, $destinationPoint);
         $deliveryCost = $distanceInKm * 0.50 * 100; // Convertir en centimes
 
@@ -121,9 +125,11 @@ class StripeController extends Controller
     {
         if(isset($request->session_id)) {
 
-            $stripe = new \Stripe\StripeClient($this->stripe_sk);
+            $stripe = new StripeClient($this->stripe_sk);
             $response = $stripe->checkout->sessions->retrieve($request->session_id);
             //dd($response);
+            $adress = Adress::where('line1', $response->shipping_details->address->line1)->where('city', $response->shipping_details->address->city)->where('postal_code', $response->shipping_details->address->postal_code)->first()->get();
+            $adress_id = $adress[0]->id;
             foreach (session('cart') as $id => $details) {
                 $product_name = $details['product_name'];
                 $total = $details['price'];
@@ -139,6 +145,7 @@ class StripeController extends Controller
                 $payment->customer_email = $response->customer_details->email;
                 $payment->payment_status = $response->status;
                 $payment->payment_method = "Stripe";
+                $payment->adress_id = $adress_id;
                 $payment->user_id = Auth::id();
                 $payment->save();
             }
