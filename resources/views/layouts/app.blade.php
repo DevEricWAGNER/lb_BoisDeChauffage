@@ -21,7 +21,7 @@
             <img src="{{ asset('storage/img/preloader.gif') }}" class="w-20">
         </div>
         <div>
-            @include('layouts.adminheader')
+            @include('layouts.header')
             <main class="mt-16 lg:mt-48">
                 {{ $slot }}
             </main>

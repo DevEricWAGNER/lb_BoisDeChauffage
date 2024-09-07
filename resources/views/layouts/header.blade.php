@@ -25,6 +25,25 @@
                     {{ __('Boutique')}}
                 </x-nav-link>
             </li>
+            @auth
+                @if(Auth::user()->admin == true)
+                    <li>
+                        <x-nav-link  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                            {{ __('Commandes')}}
+                        </x-nav-link>
+                    </li>
+                    <li>
+                        <x-nav-link  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                            {{ __('Produits')}}
+                        </x-nav-link>
+                    </li>
+                    <li>
+                        <x-nav-link  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                            {{ __('Factures')}}
+                        </x-nav-link>
+                    </li>
+                @endif
+            @endauth
         </ul>
 
         <div class="relative hidden lg:block">
@@ -99,13 +118,40 @@
         </div>
         <hr>
         @auth
-            @php
-                $link = route('cart');
-                if(Auth::user()->admin == true) {
-                    $link = route('dashboard');
-                }
-            @endphp
-            <x-nav-link-responsive :href="$link">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</x-nav-link-responsive>
+            @if(Auth::user()->admin == true)
+                <ul>
+                    <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                        {{ __('Commandes')}}
+                    </x-nav-link-responsive>
+                    <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                        {{ __('Produits')}}
+                    </x-nav-link-responsive>
+                    <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                        {{ __('Factures')}}
+                    </x-nav-link-responsive>
+                </ul>
+                <hr>
+            @endif
+            <ul>
+                <li>
+                    <p class="block p-4 text-sm font-semibold text-black rounded">{{ Auth::user()->firstname }} {{ Auth::user()->lastname }}</p>
+                </li>
+                <x-nav-link-responsive :href="route('cart')">{{ __('Panier') }}</x-nav-link-responsive>
+                <x-nav-link-responsive :href="route('commandes')">{{ __('Mes commandes') }}</x-nav-link-responsive>
+                <x-nav-link-responsive :href="route('profile.edit')">{{ __('Paramètres') }}</x-nav-link-responsive>
+            </ul>
+            <hr>
+            <ul>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-nav-link-responsive role="menuitem" tabindex="-1" id="user-menu-item-3" :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                            {{ __('Se déconnecter') }}
+                        </x-nav-link-responsive>
+                    </form>
+                </li>
+            </ul>
+
         @else
             <x-nav-link-responsive :href="route('login')">
                 {{__('Se connecter')}}
