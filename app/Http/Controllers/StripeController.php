@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Adress;
 use App\Models\Cart;
 use App\Models\CartProduct;
+use App\Models\Distance;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,35 +26,121 @@ class StripeController extends Controller
         $this->stripe_sk = $project->stripe_secret;
     }
 
-    public function session(Request $request)
+
+
+    public function createProduct(Request $request) {
+        $stripe = new StripeClient($this->stripe_sk);
+        $product = $stripe->products->create([
+            'description' => $request->description,
+            'images' => [$request->image],
+            'name' => $request->name,
+        ]);
+
+        $stripe->prices->create([
+            'unit_amount' => $request->price,
+            'currency' => 'eur',
+            'product' => $product->id,
+        ]);
+
+        Product::create([
+            'product_id' => $product->id,
+            'product_name' => $request->name,
+            'product_description' => $request->description,
+            'photo' => $request->image,
+            'price' => $request->price,
+            'type' => 'physical',
+            'sales_count' => 0
+        ]);
+
+        return redirect()->route('admin.products')->with('success', 'Produit créé avec succès');
+    }
+
+    public function updateProduct(Request $request) {
+        $stripe = new StripeClient($this->stripe_sk);
+        $stripe->products->update(
+            $request->product_id,
+            [
+                'description' => $request->description,
+                'images' => [$request->image],
+                'name' => $request->name,
+            ]
+        );
+
+        $stripe->prices->update(
+            $request->price_id,
+            [
+                'unit_amount' => $request->price,
+                'currency' => 'eur',
+                'product' => $request->product_id,
+            ]
+        );
+
+        Product::where('product_id', $request->product_id)->update([
+            'product_name' => $request->name,
+            'product_description' => $request->description,
+            'photo' => $request->image,
+            'price' => $request->price,
+            'type' => 'physical',
+            'sales_count' => 0
+        ]);
+
+        return redirect()->route('admin.products')->with('success', 'Produit mis à jour avec succès');
+    }
+
+    public function deleteProduct(Request $request) {
+        $stripe = new StripeClient($this->stripe_sk);
+        $stripe->products->delete($request->product_id);
+
+        Product::where('product_id', $request->product_id)->delete();
+
+        return redirect()->route('admin.products')->with('success', 'Produit supprimé avec succès');
+    }
+
+    /*public function session(Request $request)
     {
         $stripe = new StripeClient($this->stripe_sk);
 
         $adress = Adress::find($request->adress_id);
 
-        // 1. Créer un client Stripe avec l'adresse de livraison
-        $customer = $stripe->customers->create([
-            'email' => Auth::user()->email,
-            'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
-            'phone' => Auth::user()->phone,
-            'address' => [
-                'line1' => $adress->line1,
-                'line2' => $adress->line2,
-                'city' => $adress->city,
-                'postal_code' => $adress->postal_code,
-                'country' => $adress->country,
-            ],
-            'shipping' => [
+        $customers = $stripe->customers->all();
+        $customerFound = false;
+        $customerId = '';
+        foreach ($customers->data as $customer) {
+            if($customer->email == Auth::user()->email) {
+                $customerFound = true;
+                $customerId = $customer->id;
+                break;
+            }
+        }
+
+        if (!$customerFound) {
+            // 1. Créer un client Stripe avec l'adresse de livraison
+            $customer = $stripe->customers->create([
+                'email' => Auth::user()->email,
                 'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                'phone' => Auth::user()->phone,
                 'address' => [
                     'line1' => $adress->line1,
                     'line2' => $adress->line2,
-                    'city' =>  $adress->city,
+                    'city' => $adress->city,
                     'postal_code' => $adress->postal_code,
                     'country' => $adress->country,
                 ],
-            ],
-        ]);
+                'shipping' => [
+                    'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                    'address' => [
+                        'line1' => $adress->line1,
+                        'line2' => $adress->line2,
+                        'city' =>  $adress->city,
+                        'postal_code' => $adress->postal_code,
+                        'country' => $adress->country,
+                    ],
+                ],
+            ]);
+        } else {
+            $customer = $stripe->customers->retrieve($customerId);
+        }
+
 
         // 2. Calculer le coût de la livraison (exemple)
         $startingPoint = '123 Main St, Paris, FR';
@@ -60,15 +148,153 @@ class StripeController extends Controller
         $distanceInKm = $this->calculateDistance($startingPoint, $destinationPoint);
         $deliveryCost = $distanceInKm * 0.50 * 100; // Convertir en centimes
 
+        $invoice = $stripe->invoices->create([
+            'customer' => $customer->id,
+            'pending_invoice_items_behavior' => 'exclude',
+            'collection_method' => 'send_invoice',
+            'days_until_due' => 0,
+        ]);
+
+
+        $panier = CartProduct::where('cart_id', Auth::user()->carts[0]->id)->get();
+        foreach ($panier as $product) {
+            $productDetails = Product::where('id', $product->product_id)->first();
+            $product_id = $productDetails->product_id;
+            $unit_amount = $productDetails->price;
+            $quantity = $product->quantity;
+
+            $stripe->invoiceItems->create([
+                'customer' => $customer->id,
+                'invoice' => $invoice->id,
+                'price_data' => [
+                    'product' => $product_id,
+                    'currency' => 'EUR',
+                    'unit_amount' => $unit_amount,
+                ],
+                'quantity' => $quantity,
+            ]);
+        }
+        $deliveryProduct = $stripe->products->create([
+            'name' => 'Frais de livraison',
+        ]);
+
+        $stripe->invoices->update(
+            $invoice->id,
+            [
+                "shipping_details" => [
+                    "address" => [
+                        'line1' => $adress->line1,
+                        'line2' => $adress->line2,
+                        'city' => $adress->city,
+                        'postal_code' => $adress->postal_code,
+                        'country' => $adress->country,
+                    ],
+                    "name" => Auth::user()->firstname.' '.Auth::user()->lastname,
+                    "phone" => Auth::user()->phone
+                ]
+            ]
+        );
+
+        $stripe->invoiceItems->create([
+            'customer' => $customer->id,
+            'invoice' => $invoice->id,
+            'price_data' => [
+                'currency' => 'EUR',
+                'unit_amount' => $deliveryCost, // Coût de la livraison en centimes
+                'product' => $deliveryProduct->id,
+            ],
+            'quantity' => 1,
+        ]);
+
+        $invoice = $stripe->invoices->finalizeInvoice($invoice->id);
+
+        // 5. Rediriger l'utilisateur vers la page de paiement Stripe
+        if(isset($invoice->id) && $invoice->id != ''){
+            return redirect($invoice->hosted_invoice_url);
+        } else {
+            return redirect()->route('cancel');
+        }
+    }*/
+
+    public function session(Request $request)
+    {
+        $stripe = new \Stripe\StripeClient($this->stripe_sk);
+
+        $adress = Adress::find($request->adress_id);
+
+        $customers = $stripe->customers->all();
+        $customerFound = false;
+        $customerId = '';
+        foreach ($customers->data as $customer) {
+            if($customer->email == Auth::user()->email) {
+                $customerFound = true;
+                $customerId = $customer->id;
+                break;
+            }
+        }
+
+        if (!$customerFound) {
+            // 1. Créer un client Stripe avec l'adresse de livraison
+            $customer = $stripe->customers->create([
+                'email' => Auth::user()->email,
+                'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                'phone' => Auth::user()->phone,
+                'address' => [
+                    'line1' => $adress->line1,
+                    'line2' => $adress->line2,
+                    'city' => $adress->city,
+                    'postal_code' => $adress->postal_code,
+                    'country' => $adress->country,
+                ],
+                'shipping' => [
+                    'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                    'address' => [
+                        'line1' => $adress->line1,
+                        'line2' => $adress->line2,
+                        'city' =>  $adress->city,
+                        'postal_code' => $adress->postal_code,
+                        'country' => $adress->country,
+                    ],
+                ],
+            ]);
+        } else {
+            $customer = $stripe->customers->retrieve($customerId);
+            // if customer shipping adress is = to the one in the request, we don't need to update it else we update it
+            if ($customer->shipping->address->line1!= $adress->line1 ||
+                $customer->shipping->address->line2!= $adress->line2 ||
+                $customer->shipping->address->city!= $adress->city ||
+                $customer->shipping->address->postal_code!= $adress->postal_code ||
+                $customer->shipping->address->country!= $adress->country) {
+                $customer = $stripe->customers->update($customerId, [
+                   'shipping' => [
+                    'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                        'address' => [
+                            'line1' => $adress->line1,
+                            'line2' => $adress->line2,
+                            'city' =>  $adress->city,
+                            'postal_code' => $adress->postal_code,
+                            'country' => $adress->country,
+                        ],
+                    ],
+                ]);
+            }
+        }
+
+        // 2. Calculer le coût de la livraison (exemple)
+        $startingPoint = '12 rue de la charrue 67300 Schiltigheim';
+        $destinationPoint = $adress->line1 . ", " . $adress->city . ", " . $adress->country;
+        $distanceInKm = $this->calculateDistance($startingPoint, $destinationPoint);
+        $deliveryCost = $distanceInKm * 0.50 * 100; // Convertir en centimes
+
+
         // 3. Créer les items de produit pour Stripe
         $productItems = [];
-        foreach (session('cart') as $id => $details) {
-            $product_name = $details['product_name'];
-            $total = $details['price'];
-            $quantity = $details['quantity'];
-
-            $unit_amount = $total; // Multiplie par 100 pour obtenir les centimes
-
+        $panier = CartProduct::where('cart_id', Auth::user()->carts[0]->id)->get();
+        foreach ($panier as $product) {
+            $productDetails = Product::where('id', $product->product_id)->first();
+            $product_name = $productDetails->product_name;
+            $unit_amount = $productDetails->price;
+            $quantity = $product->quantity;
             $productItems[] = [
                 'price_data' => [
                     'product_data' => [
@@ -112,14 +338,84 @@ class StripeController extends Controller
             return redirect()->route('cancel');
         }
     }
+    private function getCoordinates($address)
+    {
+        $apiKey = 'U1nVuAAdWyALz14Xi9p0St8yCYTQPApj'; // Replace with your actual TomTom API key
+        $encodedAddress = urlencode($address);
+        $url = "https://api.tomtom.com/search/2/geocode/$encodedAddress.json?key=$apiKey";
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $data = json_decode($response, true);
+
+        if (!empty($data['results']) && isset($data['results'][0]['position'])) {
+            $latitude = $data['results'][0]['position']['lat'];
+            $longitude = $data['results'][0]['position']['lon'];
+            return "$latitude,$longitude";
+        }
+
+        return null; // Return null if coordinates could not be found
+    }
+
 
     private function calculateDistance($startingPoint, $destinationPoint)
     {
+        $apiKey = 'U1nVuAAdWyALz14Xi9p0St8yCYTQPApj'; // Replace with your actual TomTom API key
 
-        $distanceInKm = 100;
+        // Convert addresses to coordinates
+        $startingCoordinates = $this->getCoordinates($startingPoint);
+        $destinationCoordinates = $this->getCoordinates($destinationPoint);
 
-        return $distanceInKm;
+        // If either of the coordinates is not found, return null
+        if (!$startingCoordinates || !$destinationCoordinates) {
+            return null;
+        }
+
+        // Build the URL for the TomTom Routing API
+        $url = sprintf(
+            'https://api.tomtom.com/routing/1/calculateRoute/%s:%s/json?routeType=shortest&key=%s',
+            $startingCoordinates,
+            $destinationCoordinates,
+            $apiKey
+        );
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $responseData = json_decode($response, true);
+
+        if (isset($responseData['routes'][0]['summary']['lengthInMeters'])) {
+            $distanceInMeters = $responseData['routes'][0]['summary']['lengthInMeters'];
+            $distanceInKm = $distanceInMeters / 1000;
+
+            $mappings = Distance::orderBy('threshold')->get(); // Get the distance mappings
+
+            // Default value for distances greater than or equal to 1000 km
+            $mappedDistance = $mappings->last()->mapped_value; // Get the last mapping as default
+
+            // Find the appropriate mapped value based on distance
+            foreach ($mappings as $mapping) {
+                if ($distanceInKm < $mapping->threshold) {
+                    $mappedDistance = $mapping->mapped_value; // Set mapped value based on the mapping
+                    break; // Exit loop once the range is found
+                }
+            }
+
+            return $mappedDistance;
+        }
+
+        return null; // Return null if the distance could not be calculated
     }
+
 
     public function success(Request $request)
     {
@@ -127,19 +423,21 @@ class StripeController extends Controller
 
             $stripe = new StripeClient($this->stripe_sk);
             $response = $stripe->checkout->sessions->retrieve($request->session_id);
-            //dd($response);
-            $adress = Adress::where('line1', $response->shipping_details->address->line1)->where('city', $response->shipping_details->address->city)->where('postal_code', $response->shipping_details->address->postal_code)->first()->get();
-            $adress_id = $adress[0]->id;
-            foreach (session('cart') as $id => $details) {
-                $product_name = $details['product_name'];
-                $total = $details['price'];
-                $quantity = $details['quantity'];
+            $adress = Adress::where('line1', $response->shipping_details->address->line1)->where('city', $response->shipping_details->address->city)->where('postal_code', $response->shipping_details->address->postal_code)->first();
+            $adress_id = $adress->id;
+
+            $panier = CartProduct::where('cart_id', Auth::user()->carts[0]->id)->get();
+            foreach ($panier as $product) {
+                $productDetails = Product::where('id', $product->product_id)->first();
+                $product_name = $productDetails->product_name;
+                $unit_amount = $productDetails->price;
+                $quantity = $product->quantity;
 
                 $payment = new Payment();
                 $payment->payment_id = $response->id;
                 $payment->product_name = $product_name;
                 $payment->quantity = $quantity;
-                $payment->amount = $total;
+                $payment->amount = $unit_amount;
                 $payment->currency = $response->currency;
                 $payment->customer_name = $response->customer_details->name;
                 $payment->customer_email = $response->customer_details->email;
@@ -160,21 +458,7 @@ class StripeController extends Controller
 
     private function clearCart()
     {
-        // Supprimer les articles du panier de la base de données
-        $userId = Auth::id();
-        if ($userId) {
-            // Supprimer les articles du panier de l'utilisateur actuel
-            $cart = Cart::where('user_id', $userId)->first();
-
-            if ($cart) {
-                CartProduct::where('cart_id', $cart->id)
-                            ->delete();
-            }
-            $cart->delete();
-        }
-
-        // Effacer également le panier de la session
-        session()->forget('cart');
+        CartProduct::where('cart_id', Auth::user()->carts[0]->id)->delete();
     }
 
     public function cancel()

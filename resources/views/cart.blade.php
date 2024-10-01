@@ -8,35 +8,31 @@
         </h1>
 
         <div class="flex flex-col gap-5 lg:px-5">
-            @php $total = 0 @endphp
-            @if(session('cart'))
-                @foreach(session('cart') as $id => $details)
-                    @if(isset($products[$id]))
-                        @php $total += $details['price'] * $details['quantity'] @endphp
-                        <article class="flex flex-col justify-between w-full gap-2 px-4 py-6 border-b border-gray-700 lg:flex-row" data-id="{{ $id }}">
-                            <div>
-                                <h2 class="text-xl font-bold">{{ $products[$id]->product_name }}</h2>
-                                <p class="text-sm">{{ $products[$id]->product_description }}</p>
-                            </div>
-                            <div class="flex gap-5">
-                                <div class="flex items-center gap-5">
-                                    <form action="{{ route('update_cart') }}" method="POST">
-                                        @csrf
-                                        @method("PATCH")
-                                        <input type="hidden" name="id" value="{{ $id }}">
-                                        <input type="number" name="quantity" value="{{ $details['quantity'] }}" class="bg-[#171716] quantity cart_update w-32 border rounded-lg" min="1" />
-                                    </form>
-                                    <h3 class="text-lg font-bold">{{ number_format($details['price'] * $details['quantity'] / 100 , 2) }} €</h3>
-                                </div>
-                                <form action="{{ route('remove_from_cart') }}" method="POST">
+            @if($products != [])
+                @foreach($products as $product)
+                    <article class="flex flex-col justify-between w-full gap-2 px-4 py-6 border-b border-gray-700 lg:flex-row" data-id="{{ $product["product_id"] }}">
+                        <div>
+                            <h2 class="text-xl font-bold">{{ $product["product_name"] }}</h2>
+                            <p class="text-sm">{{ $product["product_description"] }}</p>
+                        </div>
+                        <div class="flex gap-5">
+                            <div class="flex items-center gap-5">
+                                <form action="{{ route('update_cart') }}" method="POST">
                                     @csrf
-                                    @method("DELETE")
-                                    <input type="hidden" name="id" value="{{ $id }}">
-                                    <button type="submit" class="px-4 py-2 text-xl bg-red-500 rounded-lg"><i class="fa fa-trash-o"></i></button>
+                                    @method("PATCH")
+                                    <input type="hidden" name="id" value="{{ $product["product_id"] }}">
+                                    <input type="number" name="quantity" value="{{ $product['quantity'] }}" class="bg-[#171716] quantity cart_update w-32 border rounded-lg" min="1" />
                                 </form>
+                                <h3 class="text-lg font-bold">{{ number_format($product['price'] * $product['quantity'] / 100 , 2) }} €</h3>
                             </div>
-                        </article>
-                    @endif
+                            <form action="{{ route('remove_from_cart') }}" method="POST">
+                                @csrf
+                                @method("DELETE")
+                                <input type="hidden" name="id" value="{{ $product["product_id"] }}">
+                                <button type="submit" class="px-4 py-2 text-xl bg-red-500 rounded-lg"><i class="fa fa-trash-o"></i></button>
+                            </form>
+                        </div>
+                    </article>
                 @endforeach
                 <div class="flex flex-col items-end gap-5">
                     <div class="space-y-2 text-right">

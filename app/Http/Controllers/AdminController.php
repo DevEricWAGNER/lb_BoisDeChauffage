@@ -10,25 +10,26 @@ class AdminController extends Controller
 {
 
     public function commandes() {
-        if (Auth::user()->admin) {
-            $commandes = Payment::get();
+        if (Auth::user()) {
+            if (Auth::user()->admin) {
+                $commandes = Payment::get();
 
-            // Regrouper les commandes par payment_id
-            $groupedCommandes = $commandes->groupBy('payment_id')->map(function ($group) {
-                // Calculer le prix total pour chaque groupe
-                $totalPrice = $group->sum(function ($commande) {
-                    return $commande->amount * $commande->quantity / 100;
+                // Regrouper les commandes par payment_id
+                $groupedCommandes = $commandes->groupBy('payment_id')->map(function ($group) {
+                    // Calculer le prix total pour chaque groupe
+                    $totalPrice = $group->sum(function ($commande) {
+                        return $commande->amount * $commande->quantity / 100;
+                    });
+
+                    return [
+                        'items' => $group,
+                        'totalPrice' => $totalPrice,
+                    ];
                 });
-
-                return [
-                    'items' => $group,
-                    'totalPrice' => $totalPrice,
-                ];
-            });
-            return view('admin.commandes', compact('groupedCommandes'));
-        } else {
-            return redirect(route('home'))->with('error', 'Vous ne pouvez pas accéder à cette page.');
+                return view('admin.commandes', compact('groupedCommandes'));
+            }
         }
+        return redirect(route('home'))->with('error', 'Vous ne pouvez pas accéder à cette page.');
     }
 
     public function changeStatus(Request $request) {
