@@ -1,4 +1,4 @@
-<footer class="relative overflow-hidden text-lg lg:text-2xl bottom-0">
+<footer class="relative bottom-0 overflow-hidden text-lg lg:text-2xl">
     <!-- Image with black overlay -->
     <div class="absolute flex items-center w-full">
         <img class="object-cover w-full" src="{{ asset('storage/img/IMG-20240429-WA0005.jpg') }}" alt="">
@@ -11,9 +11,9 @@
         <div class="flex items-center justify-center gap-4 lg:gap-6" id="footer_social_links">
         </div>
         <div class="flex items-center justify-center gap-8 text-xs lg:text-xl">
-            <a href="#" class="">Politique de confidentialité</a>
+            <a href="{{route('politique')}}" class="">Politique de confidentialité</a>
             <span class="rounded-full bg-[#966F33] w-5 h-5"></span>
-            <a href="#">Termes & Conditions</a>
+            <a href="{{route('terms')}}">Termes & Conditions</a>
         </div>
     </div>
 </footer>

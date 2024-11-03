@@ -9,9 +9,11 @@ use App\Models\Distance;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use Google\Service\BigtableAdmin\Split;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Stripe\StripeClient;
 
 class StripeController extends Controller
@@ -95,126 +97,6 @@ class StripeController extends Controller
 
         return redirect()->route('admin.products')->with('success', 'Produit supprimé avec succès');
     }
-
-    /*public function session(Request $request)
-    {
-        $stripe = new StripeClient($this->stripe_sk);
-
-        $adress = Adress::find($request->adress_id);
-
-        $customers = $stripe->customers->all();
-        $customerFound = false;
-        $customerId = '';
-        foreach ($customers->data as $customer) {
-            if($customer->email == Auth::user()->email) {
-                $customerFound = true;
-                $customerId = $customer->id;
-                break;
-            }
-        }
-
-        if (!$customerFound) {
-            // 1. Créer un client Stripe avec l'adresse de livraison
-            $customer = $stripe->customers->create([
-                'email' => Auth::user()->email,
-                'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
-                'phone' => Auth::user()->phone,
-                'address' => [
-                    'line1' => $adress->line1,
-                    'line2' => $adress->line2,
-                    'city' => $adress->city,
-                    'postal_code' => $adress->postal_code,
-                    'country' => $adress->country,
-                ],
-                'shipping' => [
-                    'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
-                    'address' => [
-                        'line1' => $adress->line1,
-                        'line2' => $adress->line2,
-                        'city' =>  $adress->city,
-                        'postal_code' => $adress->postal_code,
-                        'country' => $adress->country,
-                    ],
-                ],
-            ]);
-        } else {
-            $customer = $stripe->customers->retrieve($customerId);
-        }
-
-
-        // 2. Calculer le coût de la livraison (exemple)
-        $startingPoint = '123 Main St, Paris, FR';
-        $destinationPoint = $adress->line1 . ", " . $adress->city . ", " . $adress->country;
-        $distanceInKm = $this->calculateDistance($startingPoint, $destinationPoint);
-        $deliveryCost = $distanceInKm * 0.50 * 100; // Convertir en centimes
-
-        $invoice = $stripe->invoices->create([
-            'customer' => $customer->id,
-            'pending_invoice_items_behavior' => 'exclude',
-            'collection_method' => 'send_invoice',
-            'days_until_due' => 0,
-        ]);
-
-
-        $panier = CartProduct::where('cart_id', Auth::user()->carts[0]->id)->get();
-        foreach ($panier as $product) {
-            $productDetails = Product::where('id', $product->product_id)->first();
-            $product_id = $productDetails->product_id;
-            $unit_amount = $productDetails->price;
-            $quantity = $product->quantity;
-
-            $stripe->invoiceItems->create([
-                'customer' => $customer->id,
-                'invoice' => $invoice->id,
-                'price_data' => [
-                    'product' => $product_id,
-                    'currency' => 'EUR',
-                    'unit_amount' => $unit_amount,
-                ],
-                'quantity' => $quantity,
-            ]);
-        }
-        $deliveryProduct = $stripe->products->create([
-            'name' => 'Frais de livraison',
-        ]);
-
-        $stripe->invoices->update(
-            $invoice->id,
-            [
-                "shipping_details" => [
-                    "address" => [
-                        'line1' => $adress->line1,
-                        'line2' => $adress->line2,
-                        'city' => $adress->city,
-                        'postal_code' => $adress->postal_code,
-                        'country' => $adress->country,
-                    ],
-                    "name" => Auth::user()->firstname.' '.Auth::user()->lastname,
-                    "phone" => Auth::user()->phone
-                ]
-            ]
-        );
-
-        $stripe->invoiceItems->create([
-            'customer' => $customer->id,
-            'invoice' => $invoice->id,
-            'price_data' => [
-                'currency' => 'EUR',
-                'unit_amount' => $deliveryCost, // Coût de la livraison en centimes
-                'product' => $deliveryProduct->id,
-            ],
-            'quantity' => 1,
-        ]);
-
-        $invoice = $stripe->invoices->finalizeInvoice($invoice->id);
-
-        // 5. Rediriger l'utilisateur vers la page de paiement Stripe
-        if(isset($invoice->id) && $invoice->id != ''){
-            return redirect($invoice->hosted_invoice_url);
-        } else {
-            return redirect()->route('cancel');
-        }
-    }*/
 
     public function session(Request $request)
     {
@@ -423,37 +305,134 @@ class StripeController extends Controller
 
             $stripe = new StripeClient($this->stripe_sk);
             $response = $stripe->checkout->sessions->retrieve($request->session_id);
+            $customerId = $response->customer;
+            $shippingCost = $response->total_details->amount_shipping ?? 0;
             $adress = Adress::where('line1', $response->shipping_details->address->line1)->where('city', $response->shipping_details->address->city)->where('postal_code', $response->shipping_details->address->postal_code)->first();
             $adress_id = $adress->id;
 
             $panier = CartProduct::where('cart_id', Auth::user()->carts[0]->id)->get();
-            foreach ($panier as $product) {
-                $productDetails = Product::where('id', $product->product_id)->first();
-                $product_name = $productDetails->product_name;
-                $unit_amount = $productDetails->price;
-                $quantity = $product->quantity;
+            if (!$panier->isEmpty()) {
+                $products = [];
+                $nb_articles = 0;
+                foreach ($panier as $product) {
+                    $productDetails = Product::where('id', $product->product_id)->first();
+                    $product_name = $productDetails->product_name;
+                    $unit_amount = $productDetails->price;
+                    $quantity = $product->quantity;
+                    $nb_articles += $quantity;
 
-                $payment = new Payment();
-                $payment->payment_id = $response->id;
-                $payment->product_name = $product_name;
-                $payment->quantity = $quantity;
-                $payment->amount = $unit_amount;
-                $payment->currency = $response->currency;
-                $payment->customer_name = $response->customer_details->name;
-                $payment->customer_email = $response->customer_details->email;
-                $payment->payment_status = $response->status;
-                $payment->payment_method = "Stripe";
-                $payment->adress_id = $adress_id;
-                $payment->user_id = Auth::id();
-                $payment->save();
+                    $payment = new Payment();
+                    $payment->payment_id = $response->id;
+                    $payment->product_name = $product_name;
+                    $payment->quantity = $quantity;
+                    $payment->amount = $unit_amount;
+                    $payment->currency = $response->currency;
+                    $payment->customer_name = $response->customer_details->name;
+                    $payment->customer_email = $response->customer_details->email;
+                    $payment->payment_status = $response->status;
+                    $payment->payment_method = "Stripe";
+                    $payment->adress_id = $adress_id;
+                    $payment->user_id = Auth::id();
+                    $payment->save();
+                    $products[] = $product->product_id . "," . $quantity;
+                }
+
+                $this->clearCart();
+
+                $invoice = $this->createInvoiceFromSession($customerId, $request->session_id, $products, $shippingCost);
+
+                $tva_bool = false;
+                if ($invoice->tax != null) {
+                    $tva_bool = true;
+                }
+                $address = $invoice->customer_shipping->address;
+                $shipping_adress1 = $address->postal_code . " " . $address->city;
+                $shipping_adress2 = $address->line1 . " " . $address->line2;
+                $shipping_adress3 = $address->country;
+
+                $pdf = Controller::downloadInvoice($invoice->invoice_pdf, $invoice->number);
+
+                SendMailController::sendInvoice(
+                    $pdf,
+                    $invoice->hosted_invoice_url,
+                    $invoice->number,
+                    $nb_articles,
+                    ($invoice->total - $response->shipping_cost->amount_total),
+                    $response->shipping_cost->amount_total,
+                    $tva_bool,
+                    $invoice->tax,
+                    $invoice->total,
+                    $shipping_adress1,
+                    $shipping_adress2,
+                    $shipping_adress3
+                );
             }
-
-            $this->clearCart();
             return view('success');
 
         } else {
             return redirect()->route('cancel');
         }
+    }
+
+    private function createInvoiceFromSession($customerId, $sessionId, $products, $shippingCost)
+    {
+        $stripe = new \Stripe\StripeClient($this->stripe_sk);
+
+
+        $customer = $stripe->customers->retrieve($customerId);
+
+        $invoice = $stripe->invoices->create([
+            'customer' => $customer->id,
+            'auto_advance' => true,
+        ]);
+
+        $lineItems = $stripe->checkout->sessions->allLineItems($sessionId)->data;
+        foreach ($products as $product_infos) {
+            $product = explode(",",$product_infos)[0];
+            $quantity = explode(",",$product_infos)[1];
+            $productId = Product::where('id', $product)->first()->product_id;
+            $product = $stripe->products->retrieve($productId);
+
+            $prices = $stripe->prices->all();
+            $prices = $prices['data'];
+
+            $priceId = null;
+
+            foreach ($prices as $price) {
+                if ($price['product'] == $productId) {
+                    $priceId = $price["id"];
+                }
+            }
+
+
+
+            $invoiceItem = $stripe->invoiceItems->create([
+                'invoice' => $invoice->id,
+                'customer' => $customer->id,
+                'quantity' => $quantity,
+                'price' => $priceId,
+                'currency' => 'eur',
+            ]);
+
+        }
+
+        if ($shippingCost > 0) {
+            $stripe->invoiceItems->create([
+                'invoice' => $invoice->id,
+                'customer' => $customer->id,
+                'amount' => $shippingCost, // montant en centimes, ex: 500 pour 5.00 EUR
+                'currency' => 'eur',
+                'description' => 'Frais de livraison',
+            ]);
+        }
+
+        // Finaliser et payer la facture automatiquement
+        $invoice->finalizeInvoice();
+
+        // invoice set as paid
+        $invoice->pay();
+
+        return $invoice;
     }
 
     private function clearCart()

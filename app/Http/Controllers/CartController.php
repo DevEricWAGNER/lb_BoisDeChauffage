@@ -137,30 +137,11 @@ class CartController extends Controller
     public function remove(Request $request)
     {
         if ($request->id) {
-            $cart = session()->get('cart', []);
-            if (isset($cart[$request->id])) {
-                unset($cart[$request->id]);
-                session()->put('cart', $cart);
+            $cart = CartProduct::where('cart_id', Auth::user()->carts[0]->id)
+            ->where('product_id', $request->id)
+            ->delete();
 
-                // Remove the cart item from the database
-                $this->removeCartItemFromDatabase($request->id);
-
-                return redirect()->route("cart")->with('success', 'Item removed from the cart.');
-            } else {
-                return redirect()->route('cart')->with('error', 'Item not found in the cart.');
-            }
-        }
-    }
-
-    private function removeCartItemFromDatabase($productId)
-    {
-        $userId = Auth::id();
-        $cart = Cart::where('user_id', $userId)->first();
-
-        if ($cart) {
-            CartProduct::where('cart_id', $cart->id)
-                        ->where('product_id', $productId)
-                        ->delete();
+            return redirect()->route("cart")->with('success', 'Item removed from the cart.');
         }
     }
 }

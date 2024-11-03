@@ -47,5 +47,12 @@ Route::get('/cancel', [StripeController::class, 'cancel'])->name('cancel');
 
 Route::get('/projectInfos', [ProjectInfoController::class, 'getInfos'])->name('projectInfos.index');
 
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+Route::get('/politique', function () {
+    return view('politique');
+})->name('politique');
+
 
 require __DIR__.'/auth.php';
