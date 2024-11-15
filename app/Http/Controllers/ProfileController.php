@@ -179,18 +179,18 @@ class ProfileController extends Controller
         $html = "";
 
         if ($shippingAdresses->isNotEmpty()) {
-            $html .= "<table class='text-gray-900' id='tableAdresses'><thead><th><td></td><td>Adresse ligne 1</td><td>Adresse ligne 2</td><td>Code Postal</td><td>Ville</td><td>Pays</td></th></thead><tbody>";
+            $html .= "<div class='relative overflow-x-auto shadow-md sm:rounded-lg'><table class='w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400' id='tableAdresses'><thead class='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400'><tr><th scope=\"col\" class=\"p-4\"></th><th scope=\"col\" class=\"px-6 py-3\">Adresse ligne 1</th><th scope=\"col\" class=\"px-6 py-3\">Adresse ligne 2</th><th scope=\"col\" class=\"px-6 py-3\">Code Postal</th><th scope=\"col\" class=\"px-6 py-3\">Ville</th><th scope=\"col\" class=\"px-6 py-3\">Pays</th></tr></thead><tbody>";
             foreach ($shippingAdresses as $adresse) {
-                $html .= "<tr>";
-                $html .= "<td><input type='radio' id='selectForShipping_" . $adresse->id . "' name='selectForShipping' value='" . $adresse->id . "'></td>"; // Vous pouvez insérer un contenu ici si nécessaire
-                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line1) . "</label></td>";
-                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line2) . "</label></td>";
-                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->postal_code) . "</label></td>";
-                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->city) . "</label></td>";
-                $html .= "<td><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->country) . "</label></td>";
+                $html .= "<tr class=\"bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600\">";
+                $html .= "<td class=\"w-4 p-4\"><div class=\"flex items-center\"><input id=\"selectForShipping_" . $adresse->id . "\" type=\"radio\" name='selectForShipping' class=\"w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600\" value='" . $adresse->id . "'><label for=\"checkbox-table-search-1\" class=\"sr-only\">checkbox</label></div></td>";
+                $html .= "<th scope=\"row\" class=\"px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white\"><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line1) . "</label></th>";
+                $html .= "<td class=\"px-6 py-4\"><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->line2) . "</label></td>";
+                $html .= "<td class=\"px-6 py-4\"><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->postal_code) . "</label></td>";
+                $html .= "<td class=\"px-6 py-4\"><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->city) . "</label></td>";
+                $html .= "<td class=\"px-6 py-4\"><label for='selectForShipping_" . $adresse->id . "'>" . htmlspecialchars($adresse->country) . "</label></td>";
                 $html .= "</tr>";
             }
-            $html .= "</tbody></table><br><button class='text-gray-900 btnNewAdress'>Ajouter une nouvelle adresse</button>";
+            $html .= "</tbody></table></div><br><button class='px-5 py-2.5 text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 btnNewAdress'>Ajouter une nouvelle adresse</button>";
         }
 
         return response()->json(['html' => $html]);
