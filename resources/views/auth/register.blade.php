@@ -26,7 +26,7 @@
         <div class="flex flex-col gap-2 md:flex-row">
             <div class="w-full">
                 <x-input-label for="phone" :value="__('Num. de téléphone')" />
-                <x-text-input id="phone" type="tel" name="phone" :value="old('phone')" required placeholder="Numéro de téléphone" autocomplete="phone" disabled />
+                <x-text-input id="phone" type="tel" name="phone" :value="old('phone')" required placeholder="Numéro de téléphone" autocomplete="phone" />
                 <x-input-error :messages="$errors->get('phone')" class="mt-2" />
             </div>
             <div class="w-full">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\PostMailInvoice;
+use App\Mail\PostMailWelcome;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -22,6 +23,13 @@ class SendMailController extends Controller
             "shipping_adress1" => $shipping_adress1,
             "shipping_adress2" => $shipping_adress2,
             "shipping_adress3" => $shipping_adress3
+        ]));
+    }
+
+    public static function sendWelcome($email, $firstname, $lastname) {
+        Mail::to($email)->send(new PostMailWelcome([
+            "firstname" => $firstname,
+            "lastname" => $lastname
         ]));
     }
 }
