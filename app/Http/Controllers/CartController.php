@@ -51,7 +51,7 @@ class CartController extends Controller
             }
         }
 
-        return view('cart', compact('total', 'products'));
+        return view('cart', ['title' => 'Panier', 'total' => $total, 'products' => $products]);
     }
 
     /**

@@ -23,9 +23,8 @@ class StripeController extends Controller
 
     public function __construct()
     {
-        $project = DB::connection('mysqlParams')->table('projects')->where('id', 1)->first();
-        $this->stripe_pk = $project->stripe_key;
-        $this->stripe_sk = $project->stripe_secret;
+        $this->stripe_pk = env('STRIPE_PUBLIC_KEY');
+        $this->stripe_sk = env('STRIPE_PRIVATE_KEY');
     }
 
 

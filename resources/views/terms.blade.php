@@ -1,4 +1,7 @@
 <x-home>
+    <x-slot name="title">
+        {{$title}}
+    </x-slot>
     <section class="py-20 px-28">
         <div class="flex flex-col gap-4">
             <h1 class="text-3xl font-bold uppercase text-[#966F33]">Conditions Générales de Vente</h1>

@@ -1,4 +1,7 @@
 <x-guest-layout>
+    <x-slot name="title">
+        {{$title}}
+    </x-slot>
     <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-2 text-xl">
         @csrf
 

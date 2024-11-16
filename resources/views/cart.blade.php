@@ -1,4 +1,7 @@
 <x-home>
+    <x-slot name="title">
+        {{$title}}
+    </x-slot>
     <section class="flex flex-col gap-5 p-5 mb-6 lg:py-0 lg:px-10 lg:mb-12">
         <h1 class="flex items-center gap-5 font-extrabold">
             <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">

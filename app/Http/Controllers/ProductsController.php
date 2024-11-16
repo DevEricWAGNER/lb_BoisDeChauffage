@@ -15,7 +15,7 @@ class ProductsController extends Controller
 
     public function shop() {
         $products = Product::all();
-        return view('shop', ['products' => $products]);
+        return view('shop', ['title' => 'Boutique', 'products' => $products]);
     }
 
     public function getProducts()
@@ -68,7 +68,7 @@ class ProductsController extends Controller
         }
 
         // Return the shop view with the prepared products, prices, and local products
-        return view('shop', ['products' => $productsWithPrices, 'prices' => $prices]);
+        return view('shop', ['title' => 'Boutique', 'products' => $productsWithPrices, 'prices' => $prices]);
     }
 
 }

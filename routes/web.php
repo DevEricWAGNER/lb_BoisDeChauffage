@@ -5,18 +5,14 @@ use App\Http\Controllers\AdressController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProjectInfoController;
 use App\Http\Controllers\StripeController;
-use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('home');
+    return view('home', ['title' => 'Accueil']);
 })->name('home');
 
 Route::get('/shop', [ProductsController::class, 'getProducts'])->name('shop.index');
-
-Route::get('/dashboard',[ProjectInfoController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -44,14 +40,11 @@ Route::post('/session', [StripeController::class, 'session'])->name('session');
 Route::get('/success', [StripeController::class, 'success'])->name('success');
 Route::get('/cancel', [StripeController::class, 'cancel'])->name('cancel');
 
-
-Route::get('/projectInfos', [ProjectInfoController::class, 'getInfos'])->name('projectInfos.index');
-
 Route::get('/terms', function () {
     return view('terms');
-})->name('terms');
+})->name('terms', ['title' => 'Termes et conditions']);
 Route::get('/politique', function () {
-    return view('politique');
+    return view('politique', ['title' => 'Politique de confidentialité']);
 })->name('politique');
 
 

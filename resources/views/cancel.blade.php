@@ -24,7 +24,7 @@
         </div>
         <main class="flex flex-col items-center justify-center h-full gap-14">
             <div class="flex flex-col items-center justify-center">
-                <img src="" alt="" class="w-60 aspect-square" id="logo_success">
+                <img src="{{ asset('storage/img/IMG-20240429-WA0007-removebg-preview.png')}}" alt="" class="w-60 aspect-square">
                 <h1 class="lg:text-9xl text-3xl font-extrabold text-[#966F33]">{{ __('Annulation') }}</h1>
                 <h2 class="text-xl font-bold lg:text-6xl">{{ __('de la commande') }}</h2>
             </div>

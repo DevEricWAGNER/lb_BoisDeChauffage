@@ -5,7 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title></title>
+        <title>{{ $title }} | Loïc Baldensperger</title>
+
+        <link rel="shortcut icon" href="{{ asset('storage/img/IMG-20240429-WA0007-removebg-preview.png') }}" type="image/x-icon">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,9 +19,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-[#171716] text-[#F8F8F8] min-h-screen flex flex-col justify-between">
-        <div id="preloader" class="fixed top-0 z-50 flex items-center justify-center w-full min-h-screen bg-black">
-            <img src="{{ asset('storage/img/preloader.gif') }}" class="w-20">
-        </div>
         <div>
             @include('layouts.header')
             <main class="mt-16 lg:mt-48">

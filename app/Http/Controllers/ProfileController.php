@@ -19,6 +19,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('profile.edit', [
+            'title' => 'Profile',
             'user' => $request->user(),
         ]);
     }
@@ -78,7 +79,7 @@ class ProfileController extends Controller
             ];
         });
 
-        return view('commandes', compact('groupedCommandes'));
+        return view('commandes', ['title' => 'Commandes', 'groupedCommandes' => $groupedCommandes]);
     }
 
     public function showDetailsCommande($id)

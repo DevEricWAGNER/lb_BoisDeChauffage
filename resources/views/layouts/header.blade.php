@@ -4,7 +4,7 @@
     </div>
     <nav class="rounded-t-3xl absolute top-4 z-40 w-full text-2xl flex justify-between items-center px-6 lg:py-4 bg-gradient-to-b from-[#0c0c0c] to-[#171716]">
         <x-nav-link :href="route('home')">
-            <img src="" alt="Loïc Baldensperger Logo" class="w-12" id="logo">
+            <img src="{{ asset('storage/img/IMG-20240429-WA0007-removebg-preview.png') }}" alt="Loïc Baldensperger Logo" class="w-12">
         </x-nav-link>
         <div class="lg:hidden">
             <button class="flex items-center p-3 text-[#F8F8F8] navbar-burger">
@@ -16,7 +16,7 @@
         </div>
         <ul class="absolute hidden transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 lg:mx-auto lg:flex lg:items-center lg:w-auto lg:space-x-6">
             <li>
-                <x-nav-link :href="route('home')" :active="request()->routeIs('home')" id="HomePageLink" class="hidden">
+                <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
                     {{ __('Accueil')}}
                 </x-nav-link>
             </li>
@@ -98,7 +98,7 @@
     <nav class="fixed top-0 bottom-0 left-0 flex flex-col w-5/6 h-screen max-w-sm px-6 py-6 overflow-y-auto bg-white border-r">
         <div class="flex items-center justify-between mb-8">
             <x-nav-link :href="route('home')">
-                <img src="" alt="Loïc Baldensperger Logo" class="w-12" id="logov1">
+                <img src="{{ asset('storage/img/IMG-20240429-WA0007-removebg-preview.png') }}" alt="Loïc Baldensperger Logo" class="w-12">
             </x-nav-link>
             <button class="navbar-close">
                 <svg class="w-6 h-6 text-black cursor-pointer hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -108,7 +108,7 @@
         </div>
         <div>
             <ul>
-                <x-nav-link-responsive :href="route('home')" :active="request()->routeIs('home')" id="HomePageLink2" class="hidden">
+                <x-nav-link-responsive :href="route('home')" :active="request()->routeIs('home')">
                     {{ __('Accueil')}}
                 </x-nav-link-responsive>
                 <x-nav-link-responsive :href="route('shop.index')" :active="request()->routeIs('shop.*')">

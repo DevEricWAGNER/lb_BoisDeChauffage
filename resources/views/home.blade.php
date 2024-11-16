@@ -1,4 +1,7 @@
 <x-home>
+    <x-slot name="title">
+        {{$title}}
+    </x-slot>
     @if (\Session::has('error'))
         <div id="alert-additional-content-2" class="fixed z-50 flex items-center gap-10 p-4 text-red-800 transform -translate-x-1/2 border border-red-300 rounded-lg bg-red-50 dark:bg-[#171716] dark:text-red-400 dark:border-red-800 bottom-5 left-1/2" role="alert">
             <div class="flex items-center gap-3">

@@ -1,4 +1,7 @@
 <x-home>
+    <x-slot name="title">
+        {{$title}}
+    </x-slot>
     <section class="flex flex-col gap-5 lg:px-10 lg:mb-12">
         <div class="flex items-center gap-2 px-5 lg:gap-5 lg:px-0">
             <span class="lg:w-6 lg:h-12 w-3 h-6 bg-[#966F33] rounded-full"></span>

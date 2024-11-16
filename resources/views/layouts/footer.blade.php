@@ -8,7 +8,13 @@
     <!-- Footer content -->
     <div class="relative z-20 flex flex-col items-center gap-5 py-5 lg:py-12 lg:gap-8 justify-evenly">
         <p>Rejoignez nous sur les réseaux</p>
-        <div class="flex items-center justify-center gap-4 lg:gap-6" id="footer_social_links">
+        <div class="flex items-center justify-center gap-4 lg:gap-6">
+            <a href="mailto:contact@webwagner.fr" rel="noopener noreferrer">
+                <img class="w-6 lg:w-16" src="{{ asset('storage/icons/social/gmail.png') }}" alt="">
+            </a>
+            <a href="https://www.facebook.com/loic.baldensperger" target="_blank" rel="noopener noreferrer">
+                <img class="w-6 lg:w-16" src="{{ asset('storage/icons/social/facebook.png') }}" alt="">
+            </a>
         </div>
         <div class="flex items-center justify-center gap-8 text-xs lg:text-xl">
             <a href="{{route('politique')}}" class="">Politique de confidentialité</a>

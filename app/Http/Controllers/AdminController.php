@@ -26,7 +26,7 @@ class AdminController extends Controller
                         'totalPrice' => $totalPrice,
                     ];
                 });
-                return view('admin.commandes', compact('groupedCommandes'));
+                return view('admin.commandes', ['title' => 'Admin', 'groupedCommandes' => $groupedCommandes]);
             }
         }
         return redirect(route('home'))->with('error', 'Vous ne pouvez pas accéder à cette page.');
