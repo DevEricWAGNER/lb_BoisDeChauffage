@@ -12,7 +12,7 @@ class AdminController extends Controller
     public function commandes() {
         if (Auth::user()) {
             if (Auth::user()->admin) {
-                $commandes = Payment::get();
+                $commandes = Payment::orderBy('updated_at', 'desc')->get();
 
                 // Regrouper les commandes par payment_id
                 $groupedCommandes = $commandes->groupBy('payment_id')->map(function ($group) {

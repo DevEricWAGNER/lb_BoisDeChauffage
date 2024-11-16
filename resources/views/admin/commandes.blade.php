@@ -16,6 +16,7 @@
                     @php
                         $firstCommande = $data['items']->first();
                         $itemCount = $data['items']->count();
+                        $totalQuantity = $data['items']->sum('quantity');
                     @endphp
                     <article class="flex flex-col justify-between w-full gap-2 px-4 py-6 border-b border-gray-700 lg:flex-row" data-id="{{ $payment_id }}">
                         <div>
@@ -48,14 +49,14 @@
                             </form>
                         </div>
                         <div class="flex items-center gap-5">
-                            <h3 class="text-lg font-bold">Nombre d'articles : {{ $itemCount }}</h3>
+                            <h3 class="flex flex-col gap-1 text-lg font-bold"><span>Nombre d'articles : {{ $itemCount }}</span><span class="text-sm">Quantité totale : {{ $totalQuantity }}</span></h3>
                             <button class="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-800 show_details">Voir le détail</button>
                         </div>
                     </article>
                 @endforeach
             @else
                 <article>
-                    <h2 class="text-xl font-bold">{{ __('Vous n\'avez passer aucunes commandes.') }}</h2>
+                    <h2 class="text-xl font-bold">{{ __('Vous n\'avez pas de commandes pour l\'instant.') }}</h2>
                 </article>
             @endif
         </div>
