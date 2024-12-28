@@ -33,6 +33,10 @@ Route::middleware('auth')->group(function () {
 Route::prefix('/admin')->group(function() {
     Route::get('/commandes', [AdminController::class, 'commandes'])->name('admin.commandes');
     Route::post('/changeStatus', [AdminController::class, 'changeStatus'])->name('admin.changeStatus');
+    Route::get('/products', [AdminController::class, 'products'])->name('admin.products');
+    Route::post('/products', [StripeController::class, 'createProducts'])->name('createProducts');
+    Route::post('/products/{id}/edit', [AdminController::class, 'updateProductByProductId'])->name('admin.products.edit');
+    Route::delete('/products/{id}/delete', [AdminController::class, 'deleteProductBYproductId'])->name('admin.products.delete');
 });
 
 // routes/web.php

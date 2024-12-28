@@ -33,7 +33,7 @@
                         </x-nav-link>
                     </li>
                     <li>
-                        <x-nav-link  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                        <x-nav-link  :href="route('admin.products')" :active="request()->routeIs('admin.products')">
                             {{ __('Produits')}}
                         </x-nav-link>
                     </li>
@@ -123,7 +123,7 @@
                     <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
                         {{ __('Commandes')}}
                     </x-nav-link-responsive>
-                    <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">
+                    <x-nav-link-responsive  :href="route('admin.products')" :active="request()->routeIs('admin.products')">
                         {{ __('Produits')}}
                     </x-nav-link-responsive>
                     <x-nav-link-responsive  :href="route('admin.commandes')" :active="request()->routeIs('admin.commandes')">

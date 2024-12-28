@@ -26,67 +26,175 @@ class StripeController extends Controller
         $this->stripe_pk = env('STRIPE_PUBLIC_KEY');
         $this->stripe_sk = env('STRIPE_PRIVATE_KEY');
     }
+    
+    public function createProducts(Request $request)
+    {
+        if (Auth::user() && Auth::user()->admin) {
+            $stripe = new StripeClient(app(StripeController::class)->stripe_sk);
 
+            try {
+                $price = "";
+                $priceInCents = 0;
+                if (isset($request["price"])) {
+                    $price = $request["price"];
+                    
+                    // Remplacer la virgule par un point si elle est présente
+                    $price = str_replace(',', '.', $price);
+                    
+                    // Vérifier si c'est un nombre valide
+                    if (is_numeric($price)) {
+                        // Multiplier par 100 et convertir en entier pour obtenir le montant en centimes
+                        $priceInCents = (int) round($price * 100);
+                    } else {
+                        throw new Exception("Le prix fourni n'est pas un nombre valide.", 1);
+                    }
+                } else {
+                    throw new Exception("Aucun prix fourni", 1);
+                }
+                if ($priceInCents != 0) {
+                    // Stocker l'image
+                    $imagePath = $request->hasFile('image') 
+                        ? $request->file('image')->store('products', 'public') 
+                        : null;
 
+                    // Créer le produit sur Stripe
+                    $stripeProduct = $stripe->products->create([
+                        'name' => $request['name'],
+                        'description' => $request['description'] ?? null,
+                        'images' => $imagePath ? [asset('storage/' . $imagePath)] : null,
+                    ]);
 
-    public function createProduct(Request $request) {
-        $stripe = new StripeClient($this->stripe_sk);
-        $product = $stripe->products->create([
-            'description' => $request->description,
-            'images' => [$request->image],
-            'name' => $request->name,
-        ]);
+                    // Créer un prix sur Stripe
+                    $stripePrice = $stripe->prices->create([
+                        'unit_amount' => $priceInCents,
+                        'currency' => 'eur',
+                        'product' => $stripeProduct->id,
+                    ]);
+                    dd($request['name'], $request['description'], $priceInCents, $stripeProduct->id, $imagePath ? asset('storage/' . $imagePath) : null);
+    
+                    // Stocker le produit localement
+                    $product = Product::create([
+                        'product_name' => $request['name'],
+                        'product_description' => $request['description'],
+                        'price' => $priceInCents,
+                        'product_id' => $stripeProduct->id,
+                        'photo' => $imagePath ? asset('storage/' . $imagePath) : null,
+                        'sales_count' => 0,
+                    ]);
+                } else {
+                    throw new Exception("Le prix ne peux pas être inferieur ou égal à 0", 1);
+                }
 
-        $stripe->prices->create([
-            'unit_amount' => $request->price,
-            'currency' => 'eur',
-            'product' => $product->id,
-        ]);
+                return redirect()->back()->with('success', 'Produit créé avec succès.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Erreur : ' . $e->getMessage());
+            }
+        }
 
-        Product::create([
-            'product_id' => $product->id,
-            'product_name' => $request->name,
-            'product_description' => $request->description,
-            'photo' => $request->image,
-            'price' => $request->price,
-            'type' => 'physical',
-            'sales_count' => 0
-        ]);
-
-        return redirect()->route('admin.products')->with('success', 'Produit créé avec succès');
+        return redirect(route('home'))->with('error', 'Vous ne pouvez pas accéder à cette page.');
     }
 
-    public function updateProduct(Request $request) {
-        $stripe = new StripeClient($this->stripe_sk);
-        $stripe->products->update(
-            $request->product_id,
-            [
-                'description' => $request->description,
-                'images' => [$request->image],
-                'name' => $request->name,
-            ]
-        );
+    // public function updateProduct(Request $request) {
+    //     $stripe = new StripeClient($this->stripe_sk);
+    //     $stripe->products->update(
+    //         $request->product_id,
+    //         [
+    //             'description' => $request->description,
+    //             'images' => [$request->image],
+    //             'name' => $request->name,
+    //         ]
+    //     );
 
-        $stripe->prices->update(
-            $request->price_id,
-            [
-                'unit_amount' => $request->price,
-                'currency' => 'eur',
-                'product' => $request->product_id,
-            ]
-        );
+    //     $stripe->prices->update(
+    //         $request->price_id,
+    //         [
+    //             'unit_amount' => $request->price,
+    //             'currency' => 'eur',
+    //             'product' => $request->product_id,
+    //         ]
+    //     );
 
-        Product::where('product_id', $request->product_id)->update([
-            'product_name' => $request->name,
-            'product_description' => $request->description,
-            'photo' => $request->image,
-            'price' => $request->price,
-            'type' => 'physical',
-            'sales_count' => 0
-        ]);
+    //     Product::where('product_id', $request->product_id)->update([
+    //         'product_name' => $request->name,
+    //         'product_description' => $request->description,
+    //         'photo' => $request->image,
+    //         'price' => $request->price,
+    //         'type' => 'physical',
+    //         'sales_count' => 0
+    //     ]);
 
-        return redirect()->route('admin.products')->with('success', 'Produit mis à jour avec succès');
+    //     return redirect()->route('admin.products')->with('success', 'Produit mis à jour avec succès');
+    // }
+
+    public function updateProduct(Request $request, $id)
+    {
+        if (Auth::user() && Auth::user()->admin) {
+            $stripe = new StripeClient(app(StripeController::class)->stripe_sk);
+
+            try {
+                $product = Product::findOrFail($id);
+
+                // Mise à jour du prix
+                $price = "";
+                $priceInCents = 0;
+                if (isset($request["price"])) {
+                    $price = $request["price"];
+                    $price = str_replace(',', '.', $price);
+
+                    if (is_numeric($price)) {
+                        $priceInCents = (int) round($price * 100);
+                    } else {
+                        throw new Exception("Le prix fourni n'est pas un nombre valide.", 1);
+                    }
+                }
+
+                if ($priceInCents <= 0) {
+                    throw new Exception("Le prix ne peut pas être inférieur ou égal à 0", 1);
+                }
+
+                // Mise à jour de l'image si elle est fournie
+                $imagePath = $product->photo;
+                if ($request->hasFile('image')) {
+                    $imagePath = $request->file('image')->store('products', 'public');
+                }
+
+                // Mise à jour du produit sur Stripe
+                $stripe->products->update(
+                    $product->product_id,
+                    [
+                        'name' => $request['name'] ?? $product->product_name,
+                        'description' => $request['description'] ?? $product->product_description,
+                        'images' => $imagePath ? [asset('storage/' . $imagePath)] : null,
+                    ]
+                );
+
+                // Mise à jour du prix sur Stripe (création d'un nouveau prix, car les prix ne peuvent pas être modifiés)
+                if ($priceInCents > 0 && $priceInCents !== $product->price) {
+                    $stripePrice = $stripe->prices->create([
+                        'unit_amount' => $priceInCents,
+                        'currency' => 'eur',
+                        'product' => $product->product_id,
+                    ]);
+
+                    $product->price = $priceInCents;
+                }
+
+                // Mise à jour locale du produit
+                $product->update([
+                    'product_name' => $request['name'] ?? $product->product_name,
+                    'product_description' => $request['description'] ?? $product->product_description,
+                    'photo' => $imagePath ? asset('storage/' . $imagePath) : $product->photo,
+                ]);
+
+                return redirect()->back()->with('success', 'Produit mis à jour avec succès.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Erreur : ' . $e->getMessage());
+            }
+        }
+
+        return redirect(route('home'))->with('error', 'Vous ne pouvez pas accéder à cette page.');
     }
+
 
     public function deleteProduct(Request $request) {
         $stripe = new StripeClient($this->stripe_sk);
@@ -334,6 +442,10 @@ class StripeController extends Controller
                     $payment->user_id = Auth::id();
                     $payment->save();
                     $products[] = $product->product_id . "," . $quantity;
+
+                    $productInfos = Product::find($product->product_id);
+                    $productInfos->sales_count = $productInfos->sales_count + $quantity;
+                    $productInfos->save();
                 }
 
                 $this->clearCart();
