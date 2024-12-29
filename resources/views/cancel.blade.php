@@ -15,9 +15,6 @@
 </head>
 
 <body class="bg-[#171716] text-[#F8F8F8] h-screen flex flex-col justify-between">
-    <div id="preloader" class="fixed top-0 z-50 flex items-center justify-center w-full min-h-screen bg-black">
-        <img src="{{ asset('storage/img/preloader.gif') }}" class="w-20">
-    </div>
     <div>
         <div class="flex items-center h-32 overflow-hidden">
             <img src="{{ asset('storage/img/IMG-20240429-WA0005.jpg') }}" alt="" class="">
