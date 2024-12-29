@@ -45,8 +45,8 @@ Route::get('/success', [StripeController::class, 'success'])->name('success');
 Route::get('/cancel', [StripeController::class, 'cancel'])->name('cancel');
 
 Route::get('/terms', function () {
-    return view('terms');
-})->name('terms', ['title' => 'Termes et conditions']);
+    return view('terms', ['title' => 'Termes et conditions']);
+})->name('terms');
 Route::get('/politique', function () {
     return view('politique', ['title' => 'Politique de confidentialité']);
 })->name('politique');

@@ -41,7 +41,8 @@ class AdminController extends Controller
         // Mise à jour de toutes les lignes avec le payment_id spécifié
         Payment::where('payment_id', $paymentId)
             ->update(['payment_status' => $newStatus]);
-
+        $invoice = pathinfo(Payment::where('payment_id', $paymentId)->firstOrFail()->invoice, PATHINFO_FILENAME);
+        SendMailController::sendUpdateCommand($invoice, $newStatus);
         return redirect()->back();
     }
 

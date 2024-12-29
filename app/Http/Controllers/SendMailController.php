@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\PostMailInvoice;
 use App\Mail\PostMailWelcome;
+use App\Mail\PostMailCommand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,6 +24,13 @@ class SendMailController extends Controller
             "shipping_adress1" => $shipping_adress1,
             "shipping_adress2" => $shipping_adress2,
             "shipping_adress3" => $shipping_adress3
+        ]));
+    }
+
+    public static function sendUpdateCommand($invoice_number, $statut_commande) {
+        Mail::to(auth()->user()->email)->send(new PostMailCommand([
+            "numero_facture" => $invoice_number,
+            "status_commande" => $statut_commande
         ]));
     }
 
