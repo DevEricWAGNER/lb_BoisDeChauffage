@@ -213,9 +213,9 @@
         <table class="wFull" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width:600px;">
           <tr>
             <td class="darkmode3" align="center" valign="top" style="padding:20px 0; background-color: #ffffff;">
-                <img class="light-img" src="http://lbboisdechauffage.webserver.webwagner.fr/storage/img/IMG-20240429-WA0007-removebg-preview.png" width="168" alt="wonderblum" style="color: #4a4a4a; font-family: 'Trebuchet MS', Arial, sans-serif; text-align:center; font-weight:bold; font-size:24px; line-height:28x; text-decoration: none; padding: 0;">
+                <img class="light-img" src="https://srv658782.hstgr.cloud/storage/img/IMG-20240429-WA0007-removebg-preview.png" width="168" alt="wonderblum" style="color: #4a4a4a; font-family: 'Trebuchet MS', Arial, sans-serif; text-align:center; font-weight:bold; font-size:24px; line-height:28x; text-decoration: none; padding: 0;">
                 <div class="dark-img" style="display:none; overflow:hidden; width:0px; max-height:0px; max-width:0px; line-height:0px; visibility:hidden;" align="center">
-                    <img src="http://lbboisdechauffage.webserver.webwagner.fr/storage/img/IMG-20240429-WA0007-removebg-preview.png" width="168" alt="wonderblum" style="color: #4a4a4a; font-family: 'Trebuchet MS', Arial, sans-serif; text-align:center; font-weight:bold; font-size:24px; line-height:28px; text-decoration: none; padding: 0;" border="0" />
+                    <img src="https://srv658782.hstgr.cloud/storage/img/IMG-20240429-WA0007-removebg-preview.png" width="168" alt="wonderblum" style="color: #4a4a4a; font-family: 'Trebuchet MS', Arial, sans-serif; text-align:center; font-weight:bold; font-size:24px; line-height:28px; text-decoration: none; padding: 0;" border="0" />
                 </div>
             </td>
           </tr>

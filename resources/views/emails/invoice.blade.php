@@ -132,7 +132,7 @@
                         <tr>
                           <td valign="middle">
                             <img class="dark-img"
-                              src="http://lbboisdechauffage.webserver.webwagner.fr/storage/img/IMG-20240429-WA0007-removebg-preview.png"
+                              src="https://srv658782.hstgr.cloud/storage/img/IMG-20240429-WA0007-removebg-preview.png"
                               height="100" alt="wonderblum"
                               style="color: #4a4a4a; text-align:center; font-weight:bold; font-size:24px; line-height:28px; text-decoration: none; padding: 0;"
                               border="0" />
@@ -153,7 +153,7 @@
                   style="width:600px;">
                   <tr>
                     <td align="center" style="padding-top: 25px;">
-                      <img src="http://lbboisdechauffage.webserver.webwagner.fr/storage/img/grey_check.png" width="125"
+                      <img src="https://srv658782.hstgr.cloud/storage/img/grey_check.png" width="125"
                         height="120" style="display: block; border: 0px;" /><br>
                       <h2 style="font-size: 30px; font-weight: normal; line-height: 36px; color: #028383; margin: 0;">
                         Merci de votre achat!
