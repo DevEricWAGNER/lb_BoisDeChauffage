@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Adress;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,8 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        $user->is_active = false;
+        $user->save();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -196,6 +198,33 @@ class ProfileController extends Controller
 
         return response()->json(['html' => $html]);
     }
+
+    public function confirmReactivation()
+    {
+
+        $email = $_GET["email"];
+        $code = $_GET["code"];
+
+        $user = User::where('email', $email)
+                    ->where('confirmation_code', $code)
+                    ->where('is_active', false)
+                    ->first();
+
+        if ($user) {
+            // Réactiver l'utilisateur
+            $user->is_active = true;
+            $user->confirmation_code = null; // Supprimer le code de confirmation
+            $user->save();
+
+            // Connecter l'utilisateur
+            Auth::login($user);
+
+            return redirect()->route('home')->with('status', 'Votre compte a été réactivé avec succès.');
+        }
+
+        return redirect()->back()->withErrors(['confirmation_code' => 'Code de confirmation invalide ou utilisateur introuvable.']);
+    }
+
 
 
 }

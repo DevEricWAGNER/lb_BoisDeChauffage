@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\PostMailInvoice;
 use App\Mail\PostMailWelcome;
 use App\Mail\PostMailCommand;
+use App\Mail\ReactivateAccountMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -38,6 +39,13 @@ class SendMailController extends Controller
         Mail::to($email)->send(new PostMailWelcome([
             "firstname" => $firstname,
             "lastname" => $lastname
+        ]));
+    }
+
+    public static function reactivateAccount($email, $code) {
+        $link = "https://srv658782.hstgr.cloud/reactivateAccount?email=" . $email . "&code=" . $code;
+        Mail::to($email)->send(new ReactivateAccountMail([
+            "link" => $link
         ]));
     }
 }

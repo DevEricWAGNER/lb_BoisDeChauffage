@@ -49,6 +49,10 @@
                             </form>
                         </div>
                         <div class="flex items-center gap-5">
+                            <h3 class="text-lg font-bold">Facture:</h3>
+                            <a class="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-800" href="/storage/{{ $firstCommande->invoice }}" download>Télécharger</a>
+                        </div>
+                        <div class="flex items-center gap-5">
                             <h3 class="flex flex-col gap-1 text-lg font-bold"><span>Nombre d'articles : {{ $itemCount }}</span><span class="text-sm">Quantité totale : {{ $totalQuantity }}</span></h3>
                             <button class="px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-800 show_details">Voir le détail</button>
                         </div>

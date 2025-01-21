@@ -51,5 +51,6 @@ Route::get('/politique', function () {
     return view('politique', ['title' => 'Politique de confidentialité']);
 })->name('politique');
 
+Route::get('/reactivateAccount', [ProfileController::class, 'confirmReactivation'])->name('confirm.reactivation');
 
 require __DIR__.'/auth.php';

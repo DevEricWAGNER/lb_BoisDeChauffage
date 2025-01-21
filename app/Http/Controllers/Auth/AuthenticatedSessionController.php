@@ -26,10 +26,22 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+
+        // Vérifier si le compte est actif
+        if (!$user->is_active) {
+            // Déconnecter l'utilisateur immédiatement
+            Auth::logout();
+
+            // Rediriger avec un message d'erreur
+            return redirect()->route('login')->with('error', 'Votre compte est désactivé.');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('home', absolute: false));
     }
+
 
     /**
      * Destroy an authenticated session.

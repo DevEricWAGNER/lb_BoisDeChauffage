@@ -70,17 +70,22 @@ class StripeController extends Controller
                         'currency' => 'eur',
                         'product' => $stripeProduct->id,
                     ]);
-                    dd($request['name'], $request['description'], $priceInCents, $stripeProduct->id, $imagePath ? asset('storage/' . $imagePath) : null);
 
+                    // dd($stripePrice);
                     // Stocker le produit localement
-                    $product = Product::create([
-                        'product_name' => $request['name'],
-                        'product_description' => $request['description'],
-                        'price' => $priceInCents,
-                        'product_id' => $stripeProduct->id,
-                        'photo' => $imagePath ? asset('storage/' . $imagePath) : null,
-                        'sales_count' => 0,
-                    ]);
+                    try {
+                        $product = Product::create([
+                            'product_name' => $stripeProduct->name,
+                            'product_description' => $stripeProduct->description,
+                            'price' => $priceInCents,
+                            'type' => 'physical',
+                            'product_id' => $stripeProduct->id,
+                            'photo' => $imagePath ? asset('storage/' . $imagePath) : null,
+                            'sales_count' => '0',
+                        ]);
+                    } catch (\Exception $e) {
+                        throw new Exception("Erreur lors de la création du produit : " . $e->getMessage());
+                    }
                 } else {
                     throw new Exception("Le prix ne peux pas être inferieur ou égal à 0", 1);
                 }
@@ -145,7 +150,7 @@ class StripeController extends Controller
                 $customer->shipping->address->country!= $adress->country) {
                 $customer = $stripe->customers->update($customerId, [
                    'shipping' => [
-                    'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
+                        'name' => Auth::user()->firstname.' '.Auth::user()->lastname,
                         'address' => [
                             'line1' => $adress->line1,
                             'line2' => $adress->line2,
@@ -317,6 +322,7 @@ class StripeController extends Controller
                 }
 
                 $invoice = $this->createInvoiceFromSession($customerId, $request->session_id, $products, $shippingCost);
+                $invoice = $stripe->invoices->retrieve($invoice->id, []);
 
                 $tva_bool = false;
                 if ($invoice->tax != null) {
@@ -356,6 +362,21 @@ class StripeController extends Controller
                     $productInfos->sales_count = $productInfos->sales_count + $quantity;
                     $productInfos->save();
                 }
+
+                $payment = new Payment();
+                $payment->payment_id = $response->id;
+                $payment->product_name = "Livraison";
+                $payment->quantity = "1";
+                $payment->amount = $response->amount_total - $response->amount_subtotal;
+                $payment->currency = $response->currency;
+                $payment->customer_name = $response->customer_details->name;
+                $payment->customer_email = $response->customer_details->email;
+                $payment->payment_status = $response->status;
+                $payment->payment_method = "Stripe";
+                $payment->adress_id = $adress_id;
+                $payment->invoice = $pdf;
+                $payment->user_id = Auth::id();
+                $payment->save();
 
                 $this->clearCart();
 
@@ -434,10 +455,15 @@ class StripeController extends Controller
         }
 
         // Finaliser et payer la facture automatiquement
-        $invoice->finalizeInvoice();
+        $stripe->invoices->finalizeInvoice($invoice->id, []);
 
         // invoice set as paid
-        $invoice->pay();
+        $allPaymentMethods = $stripe->customers->allPaymentMethods($customerId);
+
+
+        $stripe->invoices->pay($invoice->id, [
+            "payment_method" => $allPaymentMethods->data[0]->id
+        ]);
 
         return $invoice;
     }

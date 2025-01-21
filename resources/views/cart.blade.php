@@ -67,13 +67,13 @@
   <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
       <div class="relative w-full max-w-4xl max-h-full p-4">
           <!-- Modal content -->
-          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="relative rounded-lg shadow bg-gray-700">
               <!-- Modal header -->
-              <div class="flex items-center justify-between p-4 border-b rounded-t md:p-5 dark:border-gray-600">
-                  <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+              <div class="flex items-center justify-between p-4 border-b rounded-t md:p-5 border-gray-600">
+                  <h3 class="text-xl font-semibold text-gray-900 text-white">
                     {{ __('Choisissez une adresse de livraison') }}
                   </h3>
-                  <button type="button" class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900 ms-auto dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                  <button type="button" class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg ms-auto hover:bg-gray-600 hover:text-white" data-modal-hide="default-modal">
                       <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                       </svg>
@@ -86,7 +86,7 @@
                 <form id="NewAdresse" method="POST" action="{{route('createAdress')}}">
                     @csrf
                     @method('POST')
-                    <h4 class="text-lg text-center text-gray-900">Veuillez entrer une nouvelle adresse</h4>
+                    <h4 class="text-lg text-center text-gray-100">Veuillez entrer une nouvelle adresse</h4>
                     <div>
                         <x-input-label for="country" :value="__('Pays')" />
                         <select id="country" name="country" class="box-border block w-full text-black border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -106,7 +106,10 @@
                     <div class="test">
                         <div class="w-full">
                             <x-input-label for="adresse" :value="__('Adresse')" />
-                            <x-text-input id="adresse" type="text" name="adresse" :value="old('adresse')" required placeholder="Adresse" autocomplete="adresse" disabled />
+                            <div class="flex gap-2">
+                                <x-text-input id="adresse" type="text" name="adresse" :value="old('adresse')" required placeholder="Adresse" autocomplete="adresse" disabled />
+                                <button type="button" id="searchAdresse" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Rechercher</button>
+                            </div>
                             <x-input-error :messages="$errors->get('adresse')" class="mt-2" />
                         </div>
                         <div id="selection" style="display: none;" class="dropdown"></div>
@@ -158,10 +161,11 @@
                     url: '/adresses',
                     type: 'GET',
                     success: function(response) {
-                        console.log(response)
                         $('#modalContentAjax').empty();
                         $('#modalContentAjax').append(response.html);
-                        $('#NewAdresse').hide();
+                        if (response.html != "") {
+                            $('#NewAdresse').hide();
+                        }
                     }
                 })
             })
@@ -221,7 +225,7 @@
             var country_code = "";
 
             window.onload = function() {
-                document.getElementById("adresse").addEventListener("input", autocompleteAdresse, false);
+                document.getElementById("searchAdresse").addEventListener("click", autocompleteAdresse);
             };
 
             function displaySelection(response) {
