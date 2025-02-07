@@ -65,25 +65,5 @@
             <img class="w-full object-cover object-[center_bottom]" src="{{ asset('storage/img/IMG-20240429-WA0006.jpg') }}"
                 alt="">
         </div>
-        <div id="selloffer" class="lg:h-[42rem] relative flex flex-col justify-evenly items-center lg:gap-10 gap-5 py-5">
-            <h1 class="lg:text-7xl text-lg font-bold text-[#966F33] drop-shadow-lg">Nos Produits</h1>
-            <div class="flex justify-between gap-5">
-                <a href="">
-                    <article
-                        class="lg:w-48 w-24 aspect-square rounded-xl border solid border-[#F8F8F8] bg-gradient-to-br from-[#00000000] via-[#00000050] via-[25%] to-[#000000] backdrop-blur-sm">
-                        <img class="w-24 lg:w-48 aspect-square" src="{{ asset('storage/img/product/object.png') }}" alt="">
-
-                    </article>
-                </a>
-                <a href="#">
-                    <article
-                        class="lg:w-48 w-24 aspect-square rounded-xl border solid border-[#F8F8F8] bg-gradient-to-br from-[#00000000] via-[#00000050] via-[25%] to-[#000000] backdrop-blur-sm">
-                        <img class="w-24 lg:w-48 aspect-square" src="{{ asset('storage/img/product/object2.png') }}" alt="">
-                    </article>
-                </a>
-            </div>
-            <a class="lg:ml-16 text-[#FF9B25] lg:text-2xl lg:px-20 lg:py-4 px-4 py-2 bg-gradient-to-br from-[#272726] to-[#171716] w-fit rounded-xl border solid border-[#F8F8F8]"
-                href="{{ route('shop.index') }}">Voir plus d'articles</a>
-        </div>
     </section>
 </x-home>
